@@ -1,17 +1,6 @@
 {
     "nodes": [
       {
-        "parameters": {},
-        "name": "Start",
-        "typeVersion": 1,
-        "type": "n8n-nodes-base.start",
-        "position": [
-          -6300,
-          -820
-        ],
-        "disabled": true
-      },
-      {
         "parameters": {
           "value": "={{new Date()}}",
           "dataPropertyName": "dataAtual",
@@ -549,7 +538,8 @@
           -5800,
           60
         ],
-        "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12"
+        "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12",
+        "disabled": true
       },
       {
         "parameters": {
@@ -713,7 +703,8 @@
           -4320,
           60
         ],
-        "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12"
+        "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12",
+        "disabled": true
       },
       {
         "parameters": {
