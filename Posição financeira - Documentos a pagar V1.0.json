@@ -1,0 +1,1902 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "tipoCobrancas"
+      },
+      "name": "Buscar tipo da cobrança (D.P)",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.ERPAgriBusiness",
+      "position": [
+        -1980,
+        900
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "mergeByKey",
+        "propertyName1": "tipoPagamento",
+        "propertyName2": "codigo",
+        "overwrite": "undefined"
+      },
+      "name": "Buscar descrição do tipo de cobrança (D.P)",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1780,
+        840
+      ],
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "resource": "tipoDocumento"
+      },
+      "name": "Buscar os tipos de documento (D.P)",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.ERPAgriBusiness",
+      "position": [
+        -1600,
+        920
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "mergeByKey",
+        "propertyName1": "tipo",
+        "propertyName2": "codigo",
+        "overwrite": "undefined"
+      },
+      "name": "Buscar tipo do documento (D.P)",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1260,
+        860
+      ],
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "number": [
+            {
+              "name": "codigo",
+              "value": "={{$json[\"codigo\"]}}"
+            }
+          ],
+          "string": [
+            {
+              "name": "financeiro",
+              "value": "={{$json[\"financeiro\"]}}"
+            },
+            {
+              "name": "descricaoTipoDocumento",
+              "value": "={{$json[\"descricao\"]}}"
+            },
+            {
+              "name": "creditoDebito",
+              "value": "={{$json[\"tipo\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set3",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1440,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "valor",
+              "value": "={{$json[\"creditoDebito\"] === \"C\" ? $json[\"valor\"] === null ? 0 : $json[\"valor\"] *-1 : $json[\"valor\"] === null ? 0 : $json[\"valor\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Buscar condição de pagamento",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -480,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "equivalencia_Id": ""
+      },
+      "name": "Tipos de documentos a desconsiderar",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.equivalencias",
+      "position": [
+        -2500,
+        840
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "codigo",
+              "value": "={{Number($json[\"ValorOriginal\"])}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Tipos de documento",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2320,
+        840
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [],
+          "string": [
+            {
+              "value1": "={{$json[\"produtor\"][\"chaveIntegracao\"]}}",
+              "operation": "notEqual",
+              "value2": "0"
+            }
+          ],
+          "boolean": [
+            {
+              "value1": "={{$json[\"produtor\"] ? true : false}}",
+              "value2": true
+            },
+            {
+              "value1": "={{$json.dataVinculoProdutor ? true : false}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar usuário",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -2120,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\n\nfor (item of items) {\n  if(item.json.produtor['chaveIntegracao']){\n    var teste = Number(item.json.produtor['chaveIntegracao'])\n    var novoUsuario = item.json.dataVinculoProdutor > $items(\"Data do ultimo registro de usuário\")[0].json.valor\n    if(teste > 0){\n      newItems.push({json:{\"produtores\":teste, novoUsuario,\"dataVinculoProdutor\": item.json.dataVinculoProdutor}})\n    }\n  }\n}\n\nreturn newItems;"
+      },
+      "name": "Produtores validos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -1700,
+        600
+      ],
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "resource": "users",
+        "operation": "getAll"
+      },
+      "name": "AppProdutor3",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.appProdutor",
+      "position": [
+        -2300,
+        620
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "value": "={{new Date()}}",
+        "dataPropertyName": "dataAtual",
+        "custom": true,
+        "toFormat": "YYYY-MM-DD HH:mm:ss",
+        "options": {
+          "toTimezone": "Brazil/East"
+        }
+      },
+      "name": "Formatar data de integração",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.dateTime",
+      "position": [
+        -2300,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workflowId": "7b619721-7190-48e9-8fa7-cfc84dd25ce0",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "resource": 2
+      },
+      "name": "Data de sincronização",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.variaveis",
+      "position": [
+        -2120,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "value": "={{$json[\"dataVinculoProdutor\"] ? $json[\"dataVinculoProdutor\"] : \"1900-03-13T14:50:00\"}}",
+        "dataPropertyName": "dataVinculoProdutor",
+        "custom": true,
+        "toFormat": "YYYY-MM-DD HH:mm:ss",
+        "options": {}
+      },
+      "name": "Formatar data de cadastro",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.dateTime",
+      "position": [
+        -1900,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "integracaoLogDelete",
+        "operation": "getAll",
+        "versions": "version2",
+        "parameters": {
+          "dataInsercao": "={{$items(\"Data da ultima exclusão\")[0].json.valor.replace(\" \",\"T\")}}",
+          "dataUltimaSincronizacaoAPI": "={{$items(\"Data de sincronização\")[0].json.valor}}"
+        }
+      },
+      "name": "Buscar deleções",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.ERPAgriBusiness",
+      "position": [
+        -1520,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"tabela\"]}}",
+              "value2": "ParcelaDocumentoPagar"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "Validar tabela",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1360,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeDuplicates",
+        "compare": "selectedFields",
+        "fieldsToCompare": {
+          "fields": [
+            {
+              "fieldName": "chavesRegistroExcluido"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Remover duplicados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        -1160,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\n\nfor(item of items){\n\tvar obj = JSON.parse(item.json.chavesRegistroExcluido);\n\tobj['data'] = item.json.data\n\tobj['chaveIntegracao'] = `PARCELA#PAGAR#${obj['Codigo']}`\n\tnewItems.push(obj)\n}\n\nreturn newItems;"
+      },
+      "name": "Ajustar campo dos registros excluídos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -960,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\r\n\r\nif(items[0].json.success.length > 0){\r\n  newItems.push({\r\n    json:{\r\n      success: items[0].json.success,\r\n      successTag: true\r\n    }\r\n  });\r\n}\r\nif(items[0].json.error.length > 0){\r\n  newItems.push({\r\n    json:{\r\n      error: items[0].json.error,\r\n      errorTag: true\r\n    }\r\n  });\r\n}\r\n\r\nreturn newItems;"
+      },
+      "name": "Retornar e separar resultado na busca",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -580,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json[\"successTag\"]}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar tipos de retorno",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -380,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$items(\"Validar tipos de retorno\",0).length === 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Retorno dos erros de deleção",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -220,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "success",
+        "options": {}
+      },
+      "name": "Pegar parcelas excluídas",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        0,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "keepKeyMatches",
+        "propertyName1": "chaveIntegracao",
+        "propertyName2": "chaveIntegracao"
+      },
+      "name": "Buscar data de exclusão",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        200,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "posicaoFinanceiraTitulos",
+        "operation": "deleteMultiple",
+        "chaveIntegracao": "={{$json[\"chaveIntegracao\"]}}"
+      },
+      "name": "Deletar posições financeiras",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.appProdutor",
+      "position": [
+        -780,
+        360
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "sort",
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "data",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Manipular lista de dados1",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        380,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workflowId": "7b619721-7190-48e9-8fa7-cfc84dd25ce0",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "resource": 1,
+        "valor_variavel": "={{$items(\"Formatar data de integração\")[0].json.dataAtual}}"
+      },
+      "name": "Atualizar data da ultima deleção",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.variaveis",
+      "position": [
+        580,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workflowId": "7b619721-7190-48e9-8fa7-cfc84dd25ce0",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "resource": 2
+      },
+      "name": "Data da ultima exclusão",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.variaveis",
+      "position": [
+        -1740,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$items(\"Validar tabela\",0).length === 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar retorno das tabelas",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -2500,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeDuplicates"
+      },
+      "name": "Manipular lista de dados2",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        -680,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 1
+            }
+          ]
+        }
+      },
+      "name": "Agendar Execução",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.cron",
+      "position": [
+        -2500,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return $items(\"Produtores validos\");"
+      },
+      "name": "Retornar dados dos usuários",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        660,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sort",
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "dataVinculoProdutor",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Ordenar por data de cadastro",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        840,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workflowId": "7b619721-7190-48e9-8fa7-cfc84dd25ce0",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "resource": 1,
+        "valor_variavel": "={{$json[\"dataVinculoProdutor\"]}}"
+      },
+      "name": "Atualizar dada do ultimo cadastro de usuário",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.variaveis",
+      "position": [
+        1020,
+        1160
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workflowId": "7b619721-7190-48e9-8fa7-cfc84dd25ce0",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "resource": 1,
+        "valor_variavel": "={{$items(\"Formatar data de integração\")[0].json.dataAtual}}"
+      },
+      "name": "Atualizar data de sincronização",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.variaveis",
+      "position": [
+        480,
+        1160
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "message": "=Houve {{$items(\"Retorno dos erros de deleção\",0).length > 0 ? $items(\"Retorno dos erros de deleção\",0)[0].json[\"error\"].length : $items(\"Retorno dos erros de deleção\",1)[0].json[\"error\"].length }} erro(s) de exclusão. Favor validar os erros e as parcelas retornadas.",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b"
+      },
+      "name": "Alertar erros das deleções",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.alerta",
+      "position": [
+        0,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "removeKeyMatches",
+        "propertyName1": "tipo",
+        "propertyName2": "codigo"
+      },
+      "name": "Remover documentos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -2160,
+        820
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Ajustar resultado da alteração dos títulos\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+      },
+      "name": "Unir dados enviados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -80,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json[\"_return\"][\"code\"] ? true : false}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar status code",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -860,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"_return\"][\"code\"]}}",
+              "operation": "equal",
+              "value2": 200
+            }
+          ]
+        }
+      },
+      "name": "Validar atualização",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        100,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\n\nfor(item of items){\n\tnewItems.push({\n\t\tjson:{\n\t\t\t\"titulo\": item.json.chaveIntegracao,\n\t\t\t\"_titulosDados\": item.json,\n\t\t}\n\t})\n}\n\nreturn newItems;"
+      },
+      "name": "Retornar dados enviados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -1700,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\n\nfor(sucesso of items[0].json.success){\n\tnewItems.push(sucesso)\n}\n\nfor(erro of items[0].json.error){\n\tnewItems.push(erro)\n}\n\nreturn newItems;"
+      },
+      "name": "Ajustar resultado da alteração dos títulos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -460,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = [];\n\nfor(sucesso of items[0].json.success){\n\tnewItems.push(sucesso)\n}\n\nfor(erro of items[0].json.error){\n\tnewItems.push(erro)\n}\n\nreturn newItems;"
+      },
+      "name": "Ajustar resultado da inserção dos títulos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -1920,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "mergeByKey",
+        "propertyName1": "chaveIntegracao",
+        "propertyName2": "titulo",
+        "overwrite": "undefined"
+      },
+      "name": "Unir com dados enviados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1500,
+        1140
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Unir com dados enviados\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+      },
+      "name": "Unir resultados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -1060,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Dividir títulos para cadastro",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -2500,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "name": "Pausar envio dos títulos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -2320,
+        1120
+      ],
+      "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$node[\"Dividir títulos para cadastro\"].context[\"noItemsLeft\"]}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Verificar se há mais títulos a ser enviados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1280,
+        1140
+      ]
+    },
+    {
+      "parameters": {
+        "value1": "={{$json[\"_return\"][\"code\"]}}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "equal",
+              "value2": 201
+            },
+            {
+              "operation": "equal",
+              "value2": 202,
+              "output": 1
+            },
+            {
+              "operation": "equal",
+              "value2": 400,
+              "output": 2
+            }
+          ]
+        }
+      },
+      "name": "Validar cadastro dos títulos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -680,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "posicaoFinanceiraTitulos",
+        "operation": "updateMultiple",
+        "chaveIntegracao": "={{$json[\"_titulosDados\"][\"chaveIntegracao\"]}}",
+        "codigo": "={{$json[\"_titulosDados\"][\"codigo\"]}}",
+        "produtor": "={{$json[\"_titulosDados\"][\"produtorchaveIntegracao\"]}}",
+        "tipo": "={{$json[\"_titulosDados\"][\"financeiro\"]===\"R\" ? 1 : 0}}",
+        "dataEmissao": "={{$json[\"_titulosDados\"][\"dataEmissao\"]}}",
+        "dataVencimento": "={{$json[\"_titulosDados\"][\"dataVencimento\"]}}",
+        "dataIntegracao": "={{$json[\"_titulosDados\"][\"dataIntegracao\"]}}",
+        "parcela": "={{$json[\"_titulosDados\"][\"parcela\"]}}",
+        "tipoPagamento": "={{$json[\"_titulosDados\"][\"descricao\"]}}",
+        "instrucaoPagamento": "={{$json[\"_titulosDados\"][\"instrucaoPagamento\"]}}",
+        "tipoMoeda": "={{$json.tipoMoeda}}",
+        "siglaMoeda": "={{$json.siglaMoeda}}",
+        "valor": "={{$json[\"_titulosDados\"][\"valor\"]}}",
+        "valorOriginal": "={{$json[\"_titulosDados\"][\"valorOriginal\"]}}",
+        "pago": "={{$json[\"_titulosDados\"][\"pago\"]}}",
+        "acrescimo": "={{null}}",
+        "desconto": "={{null}}",
+        "observacao": "={{$json[\"_titulosDados\"][\"observacao\"]}}",
+        "dadosTransferencia": "={{undefined}}",
+        "dadosPix": "={{undefined}}",
+        "dadosBoletoBancario": "={{undefined}}",
+        "codigoDeBarrasBoletoBancario": "={{undefined}}",
+        "urlBoletoBancario": "={{undefined}}",
+        "urlNotaFiscal": "={{undefined}}"
+      },
+      "name": "Alterar títulos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.appProdutor",
+      "position": [
+        -680,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "posicaoFinanceiraTitulos",
+        "operation": "createMultiple",
+        "chaveIntegracao": "={{$json[\"chaveIntegracao\"]}}",
+        "codigo": "={{$json[\"codigo\"]}}",
+        "produtor": "={{$json[\"produtorchaveIntegracao\"]}}",
+        "tipo": "={{$json[\"financeiro\"]===\"R\" ? 1 : 0}}",
+        "dataEmissao": "={{$json[\"dataEmissao\"]}}",
+        "dataVencimento": "={{$json[\"dataVencimento\"]}}",
+        "dataIntegracao": "={{$json[\"dataIntegracao\"]}}",
+        "parcela": "={{$json[\"parcela\"]}}",
+        "tipoPagamento": "={{$json[\"descricao\"]}}",
+        "instrucaoPagamento": "={{$json[\"descricaoTipoDocumento\"]}}",
+        "tipoMoeda": "={{$json.tipoMoeda}}",
+        "siglaMoeda": "={{$json.siglaMoeda}}",
+        "valor": "={{$json[\"valor\"]}}",
+        "valorOriginal": "={{$json[\"valorOriginal\"]}}",
+        "pago": "={{$json[\"pago\"]}}",
+        "acrescimo": "={{null}}",
+        "desconto": "={{null}}",
+        "observacao": "={{$json[\"observacao\"]}}",
+        "dadosTransferencia": "={{undefined}}",
+        "dadosPix": "={{undefined}}",
+        "dadosBoletoBancario": "={{undefined}}",
+        "codigoDeBarrasBoletoBancario": "={{undefined}}",
+        "urlBoletoBancario": "={{undefined}}",
+        "urlNotaFiscal": "={{undefined}}"
+      },
+      "name": "Inserir títulos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.appProdutor",
+      "position": [
+        -2120,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Dividir títulos para atualizar",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -1060,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "name": "Pausar envio dos títulos alterados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -860,
+        1320
+      ],
+      "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$node[\"Dividir títulos para atualizar\"].context[\"noItemsLeft\"]}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar se há mais títulos para atualizar",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -260,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$items(\"Validar cadastro dos títulos\",1,0).length === 0 && $items(\"Validar cadastro dos títulos\",2,0).length === 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Condicional Se (IF)1",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        280,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$items(\"Validar atualização\",1,0).length === 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Condicional Se (IF)2",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        280,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "projetoId": "d622dd3b-ca00-44dc-af32-0b96b8248483",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "workflow": ""
+      },
+      "name": "Deletar títulos quitados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.executeWorkflow",
+      "position": [
+        1240,
+        1160
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "NoOp",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        -700,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "projetoId": "d622dd3b-ca00-44dc-af32-0b96b8248483",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "workflow": ""
+      },
+      "name": "Buscar dados de novos usuários",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.executeWorkflow",
+      "position": [
+        -1500,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "projetoId": "d622dd3b-ca00-44dc-af32-0b96b8248483",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b",
+        "workflow": ""
+      },
+      "name": "Buscar dados de antigos usuários",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.executeWorkflow",
+      "position": [
+        -1100,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = $items('Produtores validos',0,0)\r\n\r\nfor(produtor of newItems){\r\n  produtor.json.dataUltimaSincronizacao = $items(\"Data de sincronização\")[0].json[\"valor\"]\r\n}\r\n\r\nreturn newItems;"
+      },
+      "name": "Retornar produtores",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -1300,
+        600
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "functionCode": "const newItems = []\n\nif($items('Buscar dados de novos usuários')[0].json.existeDados != false){\n\tnewItems.push(...$items('Buscar dados de novos usuários'))\n}\n\nif($items('Buscar dados de antigos usuários')[0].json.existeDados != false){\n\tnewItems.push(...$items('Buscar dados de antigos usuários'))\n}\n\nreturn newItems;"
+      },
+      "name": "Função",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -900,
+        600
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.descricao && $json.financeiro ? true : false}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar retorno das consultas secundarias",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1080,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$items('Validar retorno das consultas secundarias',1,0).length == 0}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Validar se há documentos invalidos",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -880,
+        840
+      ]
+    },
+    {
+      "parameters": {
+        "message": "Há dados faltantes. Validar se os registros foram sincronizados.",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b"
+      },
+      "name": "Alerta",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.alerta",
+      "position": [
+        -260,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Definir Dados",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1460,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MDMzODQsImV4cCI6MTc0MDQyNDk4NCwiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3Mzk5Nzc1MTgsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiI3Njk0NzU5ODg5RDNFMzAyQTZGQ0NFQjE5RURGRDZCRiIsInNpZCI6IkVGQ0E3MTBCOEU3QTU4NzJBMUZEMkUyRjUzOTlBMDg4IiwiaWF0IjoxNzM5OTc3NTI2LCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.NmC5JRMMBExPFHYx_41R_OUOOZ8JAWu53Hpua5LnyIa4Ns08XJLdz7BfumoxchgB3ZQE7CsOy36F_lgTXQdorntxpe7Oo5VPWnzbfwHdP87a-yt0NnIAOz-OwLVc1hlxfiXONij6azW-raR4Tru9WXyLC1mmTPI_3iB7n6zybw6o2_pUJZgeV8R9KCFjqk7tJyDRVLs7q78uJZsaKlsUVPsDkmSs4ch4pN6l8mn5T5lP2XLhaTwZc1sPAlYZEy95Rm2_89EoOfiwc-f0mMpZfYFOlW9pS26NPavfRSHHX7_VNRJ27Onuhbek8VOD18z4gaSq2jylkuf0wQbUvEF6Vw",
+        "tenantId": "f822daf9-e0b8-4e8b-b639-4a74876503f8",
+        "workflowId": "7b619721-7190-48e9-8fa7-cfc84dd25ce0",
+        "workspaceId": "2420ffe8-2c97-4d3b-9774-bdcd9c3a7f2b"
+      },
+      "name": "Variavel",
+      "typeVersion": 1,
+      "type": "n8n-nodes-base.variaveis",
+      "position": [
+        1700,
+        1160
+      ]
+    }
+  ],
+  "connections": {
+    "Buscar tipo da cobrança (D.P)": {
+      "main": [
+        [
+          {
+            "node": "Buscar descrição do tipo de cobrança (D.P)",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar descrição do tipo de cobrança (D.P)": {
+      "main": [
+        [
+          {
+            "node": "Buscar os tipos de documento (D.P)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar tipo do documento (D.P)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar os tipos de documento (D.P)": {
+      "main": [
+        [
+          {
+            "node": "Set3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar tipo do documento (D.P)": {
+      "main": [
+        [
+          {
+            "node": "Validar retorno das consultas secundarias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set3": {
+      "main": [
+        [
+          {
+            "node": "Buscar tipo do documento (D.P)",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar condição de pagamento": {
+      "main": [
+        [
+          {
+            "node": "Dividir títulos para cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipos de documentos a desconsiderar": {
+      "main": [
+        [
+          {
+            "node": "Tipos de documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipos de documento": {
+      "main": [
+        [
+          {
+            "node": "Remover documentos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Validar usuário": {
+      "main": [
+        [
+          {
+            "node": "Formatar data de cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Produtores validos": {
+      "main": [
+        [
+          {
+            "node": "Buscar dados de novos usuários",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AppProdutor3": {
+      "main": [
+        [
+          {
+            "node": "Validar usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar data de integração": {
+      "main": [
+        [
+          {
+            "node": "Data de sincronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data de sincronização": {
+      "main": [
+        [
+          {
+            "node": "Data da ultima exclusão",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar data de cadastro": {
+      "main": [
+        [
+          {
+            "node": "Produtores validos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar deleções": {
+      "main": [
+        [
+          {
+            "node": "Validar tabela",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar tabela": {
+      "main": [
+        [
+          {
+            "node": "Remover duplicados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validar retorno das tabelas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remover duplicados": {
+      "main": [
+        [
+          {
+            "node": "Ajustar campo dos registros excluídos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar campo dos registros excluídos": {
+      "main": [
+        [
+          {
+            "node": "Buscar data de exclusão",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Deletar posições financeiras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retornar e separar resultado na busca": {
+      "main": [
+        [
+          {
+            "node": "Validar tipos de retorno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar tipos de retorno": {
+      "main": [
+        [
+          {
+            "node": "Pegar parcelas excluídas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AppProdutor3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retorno dos erros de deleção",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Alertar erros das deleções",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retorno dos erros de deleção": {
+      "main": [
+        [
+          {
+            "node": "AppProdutor3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pegar parcelas excluídas": {
+      "main": [
+        [
+          {
+            "node": "Buscar data de exclusão",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar data de exclusão": {
+      "main": [
+        [
+          {
+            "node": "Manipular lista de dados1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar posições financeiras": {
+      "main": [
+        [
+          {
+            "node": "Retornar e separar resultado na busca",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manipular lista de dados1": {
+      "main": [
+        [
+          {
+            "node": "Atualizar data da ultima deleção",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data da ultima exclusão": {
+      "main": [
+        [
+          {
+            "node": "Buscar deleções",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar retorno das tabelas": {
+      "main": [
+        [
+          {
+            "node": "AppProdutor3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manipular lista de dados2": {
+      "main": [
+        [
+          {
+            "node": "Buscar condição de pagamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agendar Execução": {
+      "main": [
+        [
+          {
+            "node": "Formatar data de integração",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retornar dados dos usuários": {
+      "main": [
+        [
+          {
+            "node": "Ordenar por data de cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ordenar por data de cadastro": {
+      "main": [
+        [
+          {
+            "node": "Atualizar dada do ultimo cadastro de usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar dada do ultimo cadastro de usuário": {
+      "main": [
+        [
+          {
+            "node": "Deletar títulos quitados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar data de sincronização": {
+      "main": [
+        [
+          {
+            "node": "Retornar dados dos usuários",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remover documentos": {
+      "main": [
+        [
+          {
+            "node": "Buscar descrição do tipo de cobrança (D.P)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar tipo da cobrança (D.P)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unir dados enviados": {
+      "main": [
+        [
+          {
+            "node": "Validar atualização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar status code": {
+      "main": [
+        [
+          {
+            "node": "Validar cadastro dos títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar atualização": {
+      "main": [
+        [
+          {
+            "node": "Condicional Se (IF)2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retornar dados enviados": {
+      "main": [
+        [
+          {
+            "node": "Unir com dados enviados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ajustar resultado da alteração dos títulos": {
+      "main": [
+        [
+          {
+            "node": "Validar se há mais títulos para atualizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar resultado da inserção dos títulos": {
+      "main": [
+        [
+          {
+            "node": "Unir com dados enviados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unir com dados enviados": {
+      "main": [
+        [
+          {
+            "node": "Verificar se há mais títulos a ser enviados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unir resultados": {
+      "main": [
+        [
+          {
+            "node": "Validar status code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividir títulos para cadastro": {
+      "main": [
+        [
+          {
+            "node": "Pausar envio dos títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausar envio dos títulos": {
+      "main": [
+        [
+          {
+            "node": "Inserir títulos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Retornar dados enviados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar se há mais títulos a ser enviados": {
+      "main": [
+        [
+          {
+            "node": "Unir resultados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dividir títulos para cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar cadastro dos títulos": {
+      "main": [
+        [
+          {
+            "node": "Condicional Se (IF)1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dividir títulos para atualizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alterar títulos": {
+      "main": [
+        [
+          {
+            "node": "Ajustar resultado da alteração dos títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inserir títulos": {
+      "main": [
+        [
+          {
+            "node": "Ajustar resultado da inserção dos títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividir títulos para atualizar": {
+      "main": [
+        [
+          {
+            "node": "Pausar envio dos títulos alterados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausar envio dos títulos alterados": {
+      "main": [
+        [
+          {
+            "node": "Alterar títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar se há mais títulos para atualizar": {
+      "main": [
+        [
+          {
+            "node": "Unir dados enviados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dividir títulos para atualizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Condicional Se (IF)1": {
+      "main": [
+        [
+          {
+            "node": "Atualizar data de sincronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Condicional Se (IF)2": {
+      "main": [
+        [
+          {
+            "node": "Atualizar data de sincronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar títulos quitados": {
+      "main": [
+        [
+          {
+            "node": "Definir Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NoOp": {
+      "main": [
+        [
+          {
+            "node": "Remover documentos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tipos de documentos a desconsiderar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar dados de novos usuários": {
+      "main": [
+        [
+          {
+            "node": "Retornar produtores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar dados de antigos usuários": {
+      "main": [
+        [
+          {
+            "node": "Função",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retornar produtores": {
+      "main": [
+        [
+          {
+            "node": "Buscar dados de antigos usuários",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Função": {
+      "main": [
+        [
+          {
+            "node": "NoOp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar retorno das consultas secundarias": {
+      "main": [
+        [
+          {
+            "node": "Validar se há documentos invalidos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar se há documentos invalidos": {
+      "main": [
+        [
+          {
+            "node": "Manipular lista de dados2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir Dados": {
+      "main": [
+        [
+          {
+            "node": "Variavel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
