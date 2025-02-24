@@ -1,0 +1,394 @@
+{
+    "nodes": [
+      {
+        "parameters": {},
+        "name": "Start",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.start",
+        "position": [
+          -1420,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "posicaoFinanceiraTitulos",
+          "operation": "deleteMultiple",
+          "chaveIntegracao": "={{$json.chaveIntegracao}}"
+        },
+        "name": "AppProdutor1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.appProdutor",
+        "position": [
+          -240,
+          380
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor(sucesso of items[0].json.success){\n\tnewItems.push(sucesso)\n}\n\nfor(erro of items[0].json.error){\n\tnewItems.push(erro)\n}\n\nreturn newItems;"
+        },
+        "name": "Ajustar resultado da inserção do cabeçalho",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -40,
+          380
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json._return['code'] ==200}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar se há sucesso no envio",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          540,
+          360
+        ]
+      },
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "boolean": [
+              {
+                "name": "Erro",
+                "value": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Definir Dados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          740,
+          380
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json.chaveIntegracao ? true : false}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Condicional Se (IF)",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -640,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "batchSize": 100,
+          "options": {}
+        },
+        "name": "Particionar documentos",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          -440,
+          380
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Particionar documentos\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Verificar se há pedidos para enviar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          160,
+          380
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Ajustar resultado da inserção do cabeçalho\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+        },
+        "name": "Unir dados1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          340,
+          360
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "posicaoFinanceiraTitulos",
+          "operation": "getAll"
+        },
+        "name": "Buscar posições financeiras",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.appProdutor",
+        "position": [
+          -1000,
+          460
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "mode": "keepKeyMatches",
+          "propertyName1": "chaveIntegracao",
+          "propertyName2": "chaveIntegracao"
+        },
+        "name": "Filtrar cheques",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -840,
+          400
+        ],
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items('Condicional Se (IF)',0,0).length == 0}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Condicional Se (IF)1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -440,
+          600
+        ]
+      },
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "boolean": [
+              {
+                "name": "SemErro",
+                "value": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Definir Dados1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          740,
+          580
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json.situacao}}",
+                "value2": "B"
+              }
+            ]
+          }
+        },
+        "name": "Validar se existem dados cancelados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -1180,
+          400
+        ]
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Validar se existem dados cancelados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AppProdutor1": {
+        "main": [
+          [
+            {
+              "node": "Ajustar resultado da inserção do cabeçalho",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ajustar resultado da inserção do cabeçalho": {
+        "main": [
+          [
+            {
+              "node": "Verificar se há pedidos para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se há sucesso no envio": {
+        "main": [
+          [
+            {
+              "node": "Definir Dados1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Definir Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Condicional Se (IF)": {
+        "main": [
+          [
+            {
+              "node": "Particionar documentos",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Condicional Se (IF)1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Particionar documentos": {
+        "main": [
+          [
+            {
+              "node": "AppProdutor1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar se há pedidos para enviar": {
+        "main": [
+          [
+            {
+              "node": "Unir dados1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Particionar documentos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Unir dados1": {
+        "main": [
+          [
+            {
+              "node": "Validar se há sucesso no envio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar posições financeiras": {
+        "main": [
+          [
+            {
+              "node": "Filtrar cheques",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Filtrar cheques": {
+        "main": [
+          [
+            {
+              "node": "Condicional Se (IF)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Condicional Se (IF)1": {
+        "main": [
+          [
+            {
+              "node": "Definir Dados1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se existem dados cancelados": {
+        "main": [
+          [
+            {
+              "node": "Filtrar cheques",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar posições financeiras",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  }

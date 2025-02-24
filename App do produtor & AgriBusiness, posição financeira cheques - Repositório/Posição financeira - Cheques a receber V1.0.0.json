@@ -1,0 +1,1837 @@
+{
+    "nodes": [
+      {
+        "parameters": {},
+        "name": "Start",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.start",
+        "position": [
+          -6300,
+          -820
+        ],
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "value": "={{new Date()}}",
+          "dataPropertyName": "dataAtual",
+          "custom": true,
+          "toFormat": "YYYY-MM-DD HH:mm:ss",
+          "options": {
+            "toTimezone": "Brazil/East"
+          }
+        },
+        "name": "Formatar data de integração",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.dateTime",
+        "position": [
+          -5800,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workflowId": "318bc7ee-c23c-41fc-8879-3849c362f937",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "resource": 2,
+          "variavelId": "e8800a49-4e2f-4ca5-8477-fda22fb9a83d"
+        },
+        "name": "Data do ultimo registro de usuário",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          -5460,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "integracaoLogDelete",
+          "operation": "getAll",
+          "versions": "version2",
+          "parameters": {
+            "dataInsercao": "={{$items(\"Data da ultima exclusão\")[0].json.valor}}",
+            "dataUltimaSincronizacaoAPI": "={{$items(\"Data de sincronização\")[0].json.valor}}"
+          }
+        },
+        "name": "Buscar deleções",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          -5080,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json[\"tabela\"]}}",
+                "value2": "ChequesReceber"
+              }
+            ]
+          },
+          "combineOperation": "any"
+        },
+        "name": "Validar tabela",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -4920,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "removeDuplicates",
+          "compare": "selectedFields",
+          "fieldsToCompare": {
+            "fields": [
+              {
+                "fieldName": "chavesRegistroExcluido"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Remover duplicados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          -4720,
+          -840
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor(item of items){\n\tvar obj = JSON.parse(item.json.chavesRegistroExcluido);\n\tobj['data'] = item.json.data\n\tobj['chaveIntegracao'] = `CHEQUE#${obj['Numero']}`\n\tnewItems.push(obj)\n}\n\nreturn newItems;"
+        },
+        "name": "Ajustar campo dos registros excluídos",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -4520,
+          -840
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\r\n\r\nif(items[0].json.success.length > 0){\r\n  newItems.push({\r\n    json:{\r\n      success: items[0].json.success,\r\n      successTag: true\r\n    }\r\n  });\r\n}\r\nif(items[0].json.error.length > 0){\r\n  newItems.push({\r\n    json:{\r\n      error: items[0].json.error,\r\n      errorTag: true\r\n    }\r\n  });\r\n}\r\n\r\nreturn newItems;"
+        },
+        "name": "Retornar e separar resultado na busca",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -4140,
+          -840
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json[\"successTag\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar tipos de retorno",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3940,
+          -840
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items(\"Validar tipos de retorno\",0).length === 0}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Retorno dos erros de deleção",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3780,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "success",
+          "options": {}
+        },
+        "name": "Pegar parcelas excluídas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          -3560,
+          -860
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "keepKeyMatches",
+          "propertyName1": "chaveIntegracao",
+          "propertyName2": "chaveIntegracao"
+        },
+        "name": "Buscar data de exclusão",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -3360,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "posicaoFinanceiraTitulos",
+          "operation": "deleteMultiple",
+          "chaveIntegracao": "=CHEQUE#{{$json[\"Numero\"]}}"
+        },
+        "name": "Deletar posições financeiras",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.appProdutor",
+        "position": [
+          -4340,
+          -840
+        ],
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workflowId": "318bc7ee-c23c-41fc-8879-3849c362f937",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "resource": 1,
+          "variavelId": "31ffe644-62ac-42e8-ac69-91888b889e36",
+          "valor_variavel": "={{$items(\"Formatar data de integração\")[0].json.dataAtual}}"
+        },
+        "name": "Atualizar data da ultima deleção",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          -2980,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workflowId": "318bc7ee-c23c-41fc-8879-3849c362f937",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "resource": 2,
+          "variavelId": "31ffe644-62ac-42e8-ac69-91888b889e36"
+        },
+        "name": "Data da ultima exclusão",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          -5260,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items(\"Validar tabela\",0).length === 0}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar retorno das tabelas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -5980,
+          -560
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [],
+            "string": [
+              {
+                "value1": "={{$json[\"produtor\"][\"chaveIntegracao\"]}}",
+                "operation": "notEqual",
+                "value2": "0"
+              }
+            ],
+            "boolean": [
+              {
+                "value1": "={{$json[\"produtor\"] ? true : false}}",
+                "value2": true
+              },
+              {
+                "value1": "={{$json['dataVinculoProdutor'] ? true : false}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar usuário",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -5600,
+          -580
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor (item of items) {\n  if(item.json.produtor['chaveIntegracao']){\n    \n    if (item.json.produtor['chaveIntegracao'].includes(\"#\")) {\n      var teste = Number(item.json.produtor['chaveIntegracao'].split(\"#\")[1])\n      var novoUsuario = item.json.dataVinculoProdutor > $items(\"Data do ultimo registro de usuário\")[0].json.valor\n      if(teste > 0){\n        newItems.push({json:{\"produtores\":teste, novoUsuario,\"dataVinculoProdutor\": item.json.dataVinculoProdutor}})\n      }\n    }else{\n      var teste = Number(item.json.produtor['chaveIntegracao'])\n      var novoUsuario = item.json.dataVinculoProdutor > $items(\"Data do ultimo registro de usuário\")[0].json.valor\n      if(teste > 0){\n        newItems.push({json:{\"produtores\":teste, novoUsuario,\"dataVinculoProdutor\": item.json.dataVinculoProdutor}})\n      }\n    }\n  }\n}\n\nreturn newItems;"
+        },
+        "name": "Produtores validos",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -5220,
+          -600
+        ],
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "resource": "users",
+          "operation": "getAll"
+        },
+        "name": "AppProdutor3",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.appProdutor",
+        "position": [
+          -5800,
+          -580
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "value": "={{$json[\"dataVinculoProdutor\"] ? $json[\"dataVinculoProdutor\"] : \"1900-03-13T14:50:00\"}}",
+          "dataPropertyName": "dataVinculoProdutor",
+          "custom": true,
+          "toFormat": "YYYY-MM-DD HH:mm:ss",
+          "options": {}
+        },
+        "name": "Formatar data de cadastro",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.dateTime",
+        "position": [
+          -5420,
+          -600
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "tipoDocumento"
+        },
+        "name": "Buscar os tipos de documento",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          -5980,
+          -360
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "number": [
+              {
+                "name": "codigo",
+                "value": "={{$json[\"codigo\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "financeiro",
+                "value": "={{$json[\"financeiro\"]}}"
+              },
+              {
+                "name": "descricaoTipoDocumento",
+                "value": "={{$json[\"descricao\"]}}"
+              },
+              {
+                "name": "creditoDebito",
+                "value": "={{$json[\"tipo\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Dados dos tipos de documentos",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          -5800,
+          -360
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "codigoTipoDocumento",
+          "propertyName2": "codigo",
+          "overwrite": "undefined"
+        },
+        "name": "Buscar tipo do documento",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -5600,
+          -380
+        ],
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "message": "=Houve {{$items(\"Retorno dos erros de deleção\",0).length > 0 ? $items(\"Retorno dos erros de deleção\",0)[0].json[\"error\"].length : $items(\"Retorno dos erros de deleção\",1)[0].json[\"error\"].length }} erro(s) de exclusão. Favor validar os erros e as parcelas retornadas.",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b"
+        },
+        "name": "Alerta de erro ao deletar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.alerta",
+        "position": [
+          -3560,
+          -680
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "operation": "sort",
+          "sortFieldsUi": {
+            "sortField": [
+              {
+                "fieldName": "data",
+                "order": "descending"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Ordenar por data de exclusão",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          -3180,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workflowId": "318bc7ee-c23c-41fc-8879-3849c362f937",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "resource": 1,
+          "variavelId": "09b73e25-7b33-4ae8-8f9f-57577daaf8b0",
+          "valor_variavel": "={{$items(\"Formatar data de integração\")[0].json.dataAtual}}"
+        },
+        "name": "Atualizar data de sincronização",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          -2980,
+          -100
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "functionCode": "return $items(\"Produtores validos\");"
+        },
+        "name": "Retornar dados dos usuários",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -2820,
+          -100
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "sort",
+          "sortFieldsUi": {
+            "sortField": [
+              {
+                "fieldName": "dataVinculoProdutor",
+                "order": "descending"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Ordenar por data de cadastro",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          -2640,
+          -100
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workflowId": "318bc7ee-c23c-41fc-8879-3849c362f937",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "resource": 1,
+          "variavelId": "e8800a49-4e2f-4ca5-8477-fda22fb9a83d",
+          "valor_variavel": "={{$json[\"dataVinculoProdutor\"]}}"
+        },
+        "name": "Atualizar data do ultimo cadastro de usuário",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          -2460,
+          -100
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workflowId": "318bc7ee-c23c-41fc-8879-3849c362f937",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "resource": 2,
+          "variavelId": "09b73e25-7b33-4ae8-8f9f-57577daaf8b0"
+        },
+        "name": "Data de sincronização",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          -5640,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "name": "Dividir cheques para enviar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          -5980,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "amount": 10,
+          "unit": "seconds"
+        },
+        "name": "Pausar envio dos cheques",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          -5800,
+          60
+        ],
+        "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Dividir cheques para enviar\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Verificar se há mais cheques a ser enviados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -4760,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor(sucesso of items[0].json.success){\n\tnewItems.push(sucesso)\n}\n\nfor(erro of items[0].json.error){\n\tnewItems.push(erro)\n}\n\nreturn newItems;"
+        },
+        "name": "Ajustar resultado da inserção do cabeçalho",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -5400,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor(item of items){\n\tnewItems.push({\n\t\tjson:{\n\t\t\t\"titulo\": item.json.chaveIntegracao,\n\t\t\t\"_titulosDados\": item.json,\n\t\t}\n\t})\n}\n\nreturn newItems;"
+        },
+        "name": "Função",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -5180,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "chaveIntegracao",
+          "propertyName2": "titulo",
+          "overwrite": "undefined"
+        },
+        "name": "Mesclar Dados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          -4980,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "posicaoFinanceiraTitulos",
+          "operation": "createMultiple",
+          "chaveIntegracao": "={{$json[\"chaveIntegracao\"]}}",
+          "codigo": "={{$json[\"codigo\"]}}",
+          "produtor": "={{$json[\"produtorchaveIntegracao\"]}}",
+          "tipo": "={{$json[\"financeiro\"]===\"R\" ? 1 : 0}}",
+          "dataEmissao": "={{$json[\"dataEmissao\"]}}",
+          "dataVencimento": "={{$json[\"dataVencimento\"]}}",
+          "dataIntegracao": "={{$json[\"dataIntegracao\"]}}",
+          "parcela": "={{$json[\"parcela\"]}}",
+          "tipoPagamento": "CHEQUES DEPOSITAVEIS",
+          "instrucaoPagamento": "={{$json[\"instrucaoPagamento\"]}}",
+          "tipoMoeda": "={{null}}",
+          "siglaMoeda": "={{null}}",
+          "valor": "={{$json[\"valor\"]}}",
+          "valorOriginal": "={{$json[\"valorOriginal\"]}}",
+          "pago": "={{$json[\"pago\"]}}",
+          "acrescimo": "={{null}}",
+          "desconto": "={{null}}",
+          "observacao": "={{$json[\"observacao\"]}}"
+        },
+        "name": "Inserir cheques a receber",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.appProdutor",
+        "position": [
+          -5600,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "value1": "={{$json[\"_return\"][\"code\"]}}",
+          "rules": {
+            "rules": [
+              {
+                "operation": "equal",
+                "value2": 201
+              },
+              {
+                "operation": "equal",
+                "value2": 202,
+                "output": 1
+              },
+              {
+                "operation": "equal",
+                "value2": 400,
+                "output": 2
+              }
+            ]
+          }
+        },
+        "name": "Validar cadastro do documento a receber",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          -4140,
+          -140
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Mesclar Dados\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+        },
+        "name": "Unir dados cheques enviados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -4520,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json[\"_return\"][\"code\"] ? true : false}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar status code",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -4320,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "amount": 10,
+          "unit": "seconds"
+        },
+        "name": "Pausar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          -4320,
+          60
+        ],
+        "webhookId": "50046b9e-1f32-4f86-a8c5-5d8778907b12"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "name": "Dividir Dados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          -4520,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Ajustar resultado da alteração do cabeçalho\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+        },
+        "name": "Unir dados enviados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -3560,
+          40
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Dividir Dados\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar se há mais dados para atualizar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3740,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[\"_return\"][\"code\"]}}",
+                "operation": "equal",
+                "value2": 200
+              }
+            ]
+          }
+        },
+        "name": "Validar atualização",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3380,
+          40
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "posicaoFinanceiraTitulos",
+          "operation": "updateMultiple",
+          "chaveIntegracao": "={{$json[\"_titulosDados\"][\"chaveIntegracao\"]}}",
+          "codigo": "={{$json[\"_titulosDados\"][\"codigo\"]}}",
+          "produtor": "={{$json[\"_titulosDados\"][\"produtorchaveIntegracao\"]}}",
+          "tipo": "={{$json[\"_titulosDados\"][\"financeiro\"]===\"R\" ? 1 : 0}}",
+          "dataEmissao": "={{$json[\"_titulosDados\"][\"dataEmissao\"]}}",
+          "dataVencimento": "={{$json[\"_titulosDados\"][\"dataVencimento\"]}}",
+          "dataIntegracao": "={{$json[\"_titulosDados\"][\"dataIntegracao\"]}}",
+          "parcela": "={{$json[\"_titulosDados\"][\"parcela\"]}}",
+          "tipoPagamento": "CHEQUES DEPOSITAVEIS",
+          "instrucaoPagamento": "={{$json[\"_titulosDados\"][\"instrucaoPagamento\"]}}",
+          "tipoMoeda": "={{null}}",
+          "siglaMoeda": "={{null}}",
+          "valor": "={{$json[\"_titulosDados\"][\"valor\"]}}",
+          "valorOriginal": "={{$json[\"_titulosDados\"][\"valorOriginal\"]}}",
+          "pago": "={{$json[\"_titulosDados\"][\"pago\"]}}",
+          "acrescimo": "={{null}}",
+          "desconto": "={{null}}",
+          "observacao": "={{$json[\"_titulosDados\"][\"observacao\"]}}"
+        },
+        "name": "Alterar cheques a receber",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.appProdutor",
+        "position": [
+          -4140,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor(sucesso of items[0].json.success){\n\tnewItems.push(sucesso)\n}\n\nfor(erro of items[0].json.error){\n\tnewItems.push(erro)\n}\n\nreturn newItems;"
+        },
+        "name": "Ajustar resultado da alteração do cabeçalho",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -3960,
+          60
+        ]
+      },
+      {
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "name": "Agendar Execução",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          -5980,
+          -820
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items(\"Validar cadastro do documento a receber\",1,0).length === 0 && $items(\"Validar cadastro do documento a receber\",2,0).length === 0}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Condicional Se (IF)1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3160,
+          -180
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items(\"Validar atualização\",1,0).length === 0}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Condicional Se (IF)2",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -3160,
+          20
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItems = [];\n\nfor (item of items) {\n  if(Object.keys(item).length > 0){\n    item.json.novoUsuario = $items(\"Dividir buscas\")[0].json.novoUsuario\n    newItems.push(item)\n  }\n}\n\nreturn newItems.length === 0 ? [{json:{\"semDados\": true}}] : newItems;"
+        },
+        "name": "Dados para a páginação",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -4600,
+          -600
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "cheques",
+          "parameters": {
+            "dataSincronizacao": "={{$json[\"novoUsuario\"] ? \"1900-01-01 00:00:00\" : $items(\"Data de sincronização\")[0].json.valor}}",
+            "parceiro": "={{$json[\"produtores\"]}}"
+          }
+        },
+        "name": "Buscar cheques",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          -4800,
+          -600
+        ],
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json[\"numero\"] ? true : false}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Verificar se existe cheques",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -4420,
+          -600
+        ],
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "functionCode": "const newItens = []\n\nfor (item of items) {\n  if (item.json.novoUsuario) {\n    if ([\"A\", \"D\", \"J\", \"T\", \"M\"].includes(item.json.situacao)){\n      let dados = {\n        \"chaveIntegracao\": `CHEQUE#${item.json.numero}#${item.json.codigoCliente}`,\n        \"codigo\": `CHEQUE|${item.json.numero}`,\n        \"dataVencimento\": `${item.json.dataVencimento.split(\"T\")[0]}T23:59:59.000-0300`,\n        \"diasVencimento\": (Date.parse(item.json.dataVencimento) - Date.parse(item.json.data)) / (1000 * 60 * 60 * 24),\n        \"valor\": item.json.valor - item.json.valorBaixa,//\"Realizar calculo valor - valor baixa\",\n        \"valorOriginal\": item.json.valor,\n        \"pago\": item.json.valorBaixa ? Number(item.json.valorBaixa.toFixed(2)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : \"\",\n        \"tipoDocumento\": item.json.tipoDocumento,\n        \"produtorchaveIntegracao\": item.json.codigoCliente,\n        \"dataIntegracao\": `${item.json.dataSincronizacao.split(\"T\")[0]}T23:59:59.000-0300`,\n        \"dataEmissao\": `${item.json.data.split(\"T\")[0]}T23:59:59.000-0300`,\n        \"tipoPagamento\": item.json.codigoDoTipoCobranca,\n        \"parcela\": '1',\n        \"instrucaoPagamento\": \"CHEQUE\",\n        \"observacao\": \"Cheque a pagar.\",\n        \"codigoTipoDocumento\": item.json.codigoTipoDocumento,\n        \"produtores\": item.json.cliente,\n        \"situacao\": item.json.situacao\n      }\n\n      newItens.push({ json: dados })\n    }\n  } else {\n    let dados = {\n      \"chaveIntegracao\": `CHEQUE#${item.json.numero}#${item.json.codigoCliente}`,\n      \"codigo\": `CHEQUE|${item.json.numero}`,\n      \"dataVencimento\": `${item.json.dataVencimento.split(\"T\")[0]}T23:59:59.000-0300`,\n      \"diasVencimento\": (Date.parse(item.json.dataVencimento) - Date.parse(item.json.data)) / (1000 * 60 * 60 * 24),\n      \"valor\": item.json.valor - item.json.valorBaixa,//\"Realizar calculo valor - valor baixa\",\n      \"valorOriginal\": item.json.valor,\n      \"pago\": item.json.valorBaixa ? Number(item.json.valorBaixa.toFixed(2)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : \"\",\n      \"tipoDocumento\": item.json.tipoDocumento,\n      \"produtorchaveIntegracao\": item.json.codigoCliente,\n      \"dataIntegracao\": `${item.json.dataSincronizacao.split(\"T\")[0]}T23:59:59.000-0300`,\n      \"dataEmissao\": `${item.json.data.split(\"T\")[0]}T23:59:59.000-0300`,\n      \"tipoPagamento\": item.json.codigoDoTipoCobranca,\n      \"parcela\": '1',\n      \"instrucaoPagamento\": \"CHEQUE\",\n      \"observacao\": \"Cheque a pagar.\",\n      \"codigoTipoDocumento\": item.json.codigoTipoDocumento,\n      \"produtores\": item.json.cliente,\n      \"situacao\": item.json.situacao\n    }\n\n    newItens.push({ json: dados })\n  }\n}\nreturn newItens;"
+        },
+        "name": "Dados de cheques",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -4220,
+          -620
+        ],
+        "alwaysOutputData": true,
+        "executeOnce": false
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Dividir buscas\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar se há mais parceiros",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -4020,
+          -580
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Dados de cheques\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+        },
+        "name": "Unir cheques",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -3840,
+          -600
+        ]
+      },
+      {
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "name": "Dividir buscas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          -5000,
+          -600
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{['B','F','C','X','E','N','R'].includes($json.situacao)}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar se existem dados cancelados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -5420,
+          -380
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items('Validar se existem dados cancelados',0,0).length == 0}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar caminho de registros de situação 5",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -5980,
+          -120
+        ]
+      },
+      {
+        "parameters": {},
+        "name": "NoOp1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          -5800,
+          -140
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDA0MjAxNjAsImV4cCI6MTc0MDQ0MTc2MCwiaXNzIjoiaHR0cHM6Ly9hbGlhcmUuZGlnaXRhbC91YXQvYWxpYXJlL2F1dGgiLCJhdWQiOlsib3BlbmlkIiwicHJvZmlsZSIsImFsaWFyZS1pbnRlZ3JhIiwiQWxpYXJlIEludGVncmEiLCJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSJdLCJjbGllbnRfaWQiOiJhbGlhcmUtaW50ZWdyYSIsInN1YiI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImF1dGhfdGltZSI6MTczOTg5MDgzMiwiaWRwIjoibG9jYWwiLCJJZERvVXN1YXJpbyI6IjhjYjdiNjJkLWY0YjgtNGQyZC1hMWQxLTQ2Nzc4OTc1MTllNSIsImVtYWlsIjoid2VzbGxleS5tYXJpYW5vQGFsaWFyZS5jbyIsIlRlbmFudCI6ImZhZmNhNjRmLWE1M2ItNDc4ZS05MGIyLTk4ZjBlOGU5NWNhYyIsIkxldmVsIjoiTjAiLCJBbGxUZW5hbnRzIjoiSDRzSUFBQUFBQUFBQTMyUk8wNEZNUXhGOXpMMXMrVDRrN0haQVJLaW9rTVVUbUpYNkZXSUJyRjNVZ0xGOU5hNTl4Ni9maDB2ZVkvN3grTTZIZzQySEpVK1lNN3FJS0lJSG9SUW9weEx2WkhvY1R1ZThqUGY5L2t6SGQrM1A0Q0ttdEdsSUpRSHlHa0pqb1BBclRBdFhXZk0zd0Q4RDBoMFFwNGRlTFlFQ1dPSVhBNWN2S3FkWGM4Y2x3MDBhS1JiZzg0N1hMUTdqUElGYVVhRUxjVERMd0hrcmtKTEFaTzNnMllCVnNWZ1RxM2FjSE9aMXc1MjBJcHlTQndHa2paZ2RQWTk1aFRiQzVETExnRTlVcW50QmxhNkpiSTR1TzZuOUt3MXJCbWVtZjhBYno4dGZFWnF5QUVBQUE9PSIsImp0aSI6IjVEMDUzOUUwMzg4NENDMTFGOTMxODg2MDU1NUExNUJGIiwic2lkIjoiMEI0RDM5ODY0ODFBQTQwOUI2M0I3MTQxMDg4NUMxQ0MiLCJpYXQiOjE3Mzk4OTA4MzQsInNjb3BlIjpbIm5vdGlmaWNhdGlvbkh1YiIsImFsaWFyZS1iYWNrb2ZmaWNlIiwiYWxpYXJlLWludGVncmEiLCJvcGVuaWQiLCJwcm9maWxlIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.K5mcb0sW4fVCigP6xz4_0lLGUbHaxlNmNtIweJdnN5yFmFtwFqqMdDy116Y0kBlMvnurmOTv7-XIpveb-y2Xn0ubHuxx0a7wxkdLpmCoZFS-rr3tBtyiaS-skmnCUFH2yXd2Jucul2qlT3tFdIdOWTKqH1YXWQejQ_Vorqp-B6EKa_26pG4nQ6u4q-sT-YejTbxP71JbnGIVM3WEJjrGdAnavF4r17S9QKpYYl_HNC9B1w8wx1i02CI7DRuVzidq1Hzw-acK07tPBNG49OcSd_RJy0LS_yGDKL6MqNCtr5aOsJ9H_hdp1PB-UDhQsf6Ek6CggWWA8ilDxv_LJvo9HA",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "projetoId": "f90ab219-6b22-4edf-b3d7-eb190476ef0d",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b",
+          "workflow": "Posição financeira - Cheques a receber (Exclusão dos cheques baixados)"
+        },
+        "name": "Executar Fluxo",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.executeWorkflow",
+        "position": [
+          -5220,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json.Erro ? true : false}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar se todos os registros foram deletados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -5020,
+          -360
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "return $items(\"Validar se existem dados cancelados\",1,0)//.filter(registro => registro.situacao === 'B')"
+        },
+        "name": "Função1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          -4840,
+          -340
+        ]
+      },
+      {
+        "parameters": {
+          "message": "Houve um ou mais erros ao deletar um um item no App do produtor, favor validar os cheques baixados consultados e enviados.",
+          "tenantId": "380bfe9b-ccf6-4450-9a20-f453ed591245",
+          "workspaceId": "edc990b0-b4b3-42f5-a2a8-777a75babd5b"
+        },
+        "name": "Alerta1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.alerta",
+        "position": [
+          -4660,
+          -380
+        ]
+      }
+    ],
+    "connections": {
+      "Formatar data de integração": {
+        "main": [
+          [
+            {
+              "node": "Data de sincronização",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Data do ultimo registro de usuário": {
+        "main": [
+          [
+            {
+              "node": "Data da ultima exclusão",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar deleções": {
+        "main": [
+          [
+            {
+              "node": "Validar tabela",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar tabela": {
+        "main": [
+          [
+            {
+              "node": "Remover duplicados",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Validar retorno das tabelas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Remover duplicados": {
+        "main": [
+          [
+            {
+              "node": "Ajustar campo dos registros excluídos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ajustar campo dos registros excluídos": {
+        "main": [
+          [
+            {
+              "node": "Buscar data de exclusão",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Deletar posições financeiras",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Retornar e separar resultado na busca": {
+        "main": [
+          [
+            {
+              "node": "Validar tipos de retorno",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar tipos de retorno": {
+        "main": [
+          [
+            {
+              "node": "Pegar parcelas excluídas",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "AppProdutor3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Retorno dos erros de deleção",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Alerta de erro ao deletar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Retorno dos erros de deleção": {
+        "main": [
+          [
+            {
+              "node": "AppProdutor3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pegar parcelas excluídas": {
+        "main": [
+          [
+            {
+              "node": "Buscar data de exclusão",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Buscar data de exclusão": {
+        "main": [
+          [
+            {
+              "node": "Ordenar por data de exclusão",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Deletar posições financeiras": {
+        "main": [
+          [
+            {
+              "node": "Retornar e separar resultado na busca",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Data da ultima exclusão": {
+        "main": [
+          [
+            {
+              "node": "Buscar deleções",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar retorno das tabelas": {
+        "main": [
+          [
+            {
+              "node": "AppProdutor3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar usuário": {
+        "main": [
+          [
+            {
+              "node": "Formatar data de cadastro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Produtores validos": {
+        "main": [
+          [
+            {
+              "node": "Dividir buscas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AppProdutor3": {
+        "main": [
+          [
+            {
+              "node": "Validar usuário",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Formatar data de cadastro": {
+        "main": [
+          [
+            {
+              "node": "Produtores validos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar os tipos de documento": {
+        "main": [
+          [
+            {
+              "node": "Dados dos tipos de documentos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dados dos tipos de documentos": {
+        "main": [
+          [
+            {
+              "node": "Buscar tipo do documento",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Buscar tipo do documento": {
+        "main": [
+          [
+            {
+              "node": "Validar se existem dados cancelados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ordenar por data de exclusão": {
+        "main": [
+          [
+            {
+              "node": "Atualizar data da ultima deleção",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar data de sincronização": {
+        "main": [
+          [
+            {
+              "node": "Retornar dados dos usuários",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Retornar dados dos usuários": {
+        "main": [
+          [
+            {
+              "node": "Ordenar por data de cadastro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ordenar por data de cadastro": {
+        "main": [
+          [
+            {
+              "node": "Atualizar data do ultimo cadastro de usuário",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Data de sincronização": {
+        "main": [
+          [
+            {
+              "node": "Data do ultimo registro de usuário",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dividir cheques para enviar": {
+        "main": [
+          [
+            {
+              "node": "Pausar envio dos cheques",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pausar envio dos cheques": {
+        "main": [
+          [
+            {
+              "node": "Inserir cheques a receber",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Função",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar se há mais cheques a ser enviados": {
+        "main": [
+          [
+            {
+              "node": "Unir dados cheques enviados",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Dividir cheques para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ajustar resultado da inserção do cabeçalho": {
+        "main": [
+          [
+            {
+              "node": "Mesclar Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Função": {
+        "main": [
+          [
+            {
+              "node": "Mesclar Dados",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Mesclar Dados": {
+        "main": [
+          [
+            {
+              "node": "Verificar se há mais cheques a ser enviados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Inserir cheques a receber": {
+        "main": [
+          [
+            {
+              "node": "Ajustar resultado da inserção do cabeçalho",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar cadastro do documento a receber": {
+        "main": [
+          [
+            {
+              "node": "Condicional Se (IF)1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Dividir Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Unir dados cheques enviados": {
+        "main": [
+          [
+            {
+              "node": "Validar status code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar status code": {
+        "main": [
+          [
+            {
+              "node": "Validar cadastro do documento a receber",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pausar": {
+        "main": [
+          [
+            {
+              "node": "Alterar cheques a receber",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dividir Dados": {
+        "main": [
+          [
+            {
+              "node": "Pausar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Unir dados enviados": {
+        "main": [
+          [
+            {
+              "node": "Validar atualização",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se há mais dados para atualizar": {
+        "main": [
+          [
+            {
+              "node": "Unir dados enviados",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Dividir Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar atualização": {
+        "main": [
+          [
+            {
+              "node": "Condicional Se (IF)2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Alterar cheques a receber": {
+        "main": [
+          [
+            {
+              "node": "Ajustar resultado da alteração do cabeçalho",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ajustar resultado da alteração do cabeçalho": {
+        "main": [
+          [
+            {
+              "node": "Validar se há mais dados para atualizar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Agendar Execução": {
+        "main": [
+          [
+            {
+              "node": "Formatar data de integração",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Condicional Se (IF)1": {
+        "main": [
+          [
+            {
+              "node": "Atualizar data de sincronização",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Condicional Se (IF)2": {
+        "main": [
+          [
+            {
+              "node": "Atualizar data de sincronização",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dados para a páginação": {
+        "main": [
+          [
+            {
+              "node": "Verificar se existe cheques",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar cheques": {
+        "main": [
+          [
+            {
+              "node": "Dados para a páginação",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar se existe cheques": {
+        "main": [
+          [
+            {
+              "node": "Dados de cheques",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Validar se há mais parceiros",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dados de cheques": {
+        "main": [
+          [
+            {
+              "node": "Validar se há mais parceiros",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se há mais parceiros": {
+        "main": [
+          [
+            {
+              "node": "Unir cheques",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Dividir buscas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Unir cheques": {
+        "main": [
+          [
+            {
+              "node": "Buscar os tipos de documento",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar tipo do documento",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dividir buscas": {
+        "main": [
+          [
+            {
+              "node": "Buscar cheques",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se existem dados cancelados": {
+        "main": [
+          [
+            {
+              "node": "Executar Fluxo",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Validar caminho de registros de situação 5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar caminho de registros de situação 5": {
+        "main": [
+          [
+            {
+              "node": "NoOp1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NoOp1": {
+        "main": [
+          [
+            {
+              "node": "Dividir cheques para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Executar Fluxo": {
+        "main": [
+          [
+            {
+              "node": "Validar se todos os registros foram deletados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se todos os registros foram deletados": {
+        "main": [
+          [
+            {
+              "node": "Alerta1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Função1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Função1": {
+        "main": [
+          [
+            {
+              "node": "NoOp1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  }
