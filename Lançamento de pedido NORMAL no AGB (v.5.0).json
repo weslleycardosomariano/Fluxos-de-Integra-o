@@ -1,0 +1,2033 @@
+// Variáveis
+
+{
+  "success": true,
+  "data": [
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "Código do último pedido pendente",
+      "valor": "36110401381",
+      "id": "e9b83c4e-3e2e-4f56-ac97-f16203aac7c0"
+    },
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "Depósito padrão",
+      "valor": "1",
+      "id": "a842e165-6c6c-4d60-87c6-22e94d602a90"
+    },
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "Tentativa",
+      "valor": "0",
+      "id": "96771329-1f5c-420f-9070-cf0d71c3d83d"
+    },
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "Ultimo correlation token pendente",
+      "valor": "0",
+      "id": "dd64adcb-e9cc-4ffc-a01d-ef8f6efdb93b"
+    },
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "Utiliza mais de um depósito?",
+      "valor": "N",
+      "id": "700fd43c-6eca-4191-95ae-5fd95cbcf908"
+    },
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "Utiliza valor unitário da tabela?",
+      "valor": "S",
+      "id": "61f28717-fad6-4ea9-8451-928bc9a75113"
+    },
+    {
+      "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+      "nome": "chavePVPedido do último pedido pendente",
+      "valor": "0",
+      "id": "51d20313-0568-45e0-8c22-f15d0ae64d14"
+    }
+  ]
+}
+
+//Fluxo
+
+{
+    "nodes": [
+      {
+        "parameters": {},
+        "name": "Start",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.start",
+        "position": [
+          80,
+          240
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "pvPedidoItem",
+          "operation": "get",
+          "ChavePVPedido": "={{$json[\"chavePVPedido\"]}}"
+        },
+        "name": "Buscar item(ns) do pedido",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.CloverCRM",
+        "position": [
+          4140,
+          -60
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "CloverCRMApi": {
+            "id": "449",
+            "name": "Clover-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$node[\"Pega um pedido\"].context[\"noItemsLeft\"]}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar se há pedidos para enviar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          6960,
+          -60
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[\"resultCode\"]}}",
+                "operation": "equal",
+                "value2": 200
+              }
+            ],
+            "boolean": [
+              {
+                "value1": "={{$json[\"resultMessage\"].includes(\"Pedido de Venda já cadastrado\")}}",
+                "value2": true
+              }
+            ]
+          },
+          "combineOperation": "any"
+        },
+        "name": "Validar erro",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          6320,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "postEnviadoERP",
+          "operation": "post",
+          "codigo": "={{$json[\"dadosEnviados\"][\"chavePVPedido\"]}}"
+        },
+        "name": "Atualizar status do pedido",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.CloverCRM",
+        "position": [
+          6720,
+          -160
+        ],
+        "credentials": {
+          "CloverCRMApi": {
+            "id": "449",
+            "name": "Clover-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "functionCode": "const pedidoCorpo = $items(\"Buscar login do usuário do pedido\");\nconst newItems = [];\nconst utilizaValorUnitarioLiquido = $items(\"Utiliza valor unitário liquido da tabela\", 0, 0)[0].json['valor']\n\nfor (pedido of pedidoCorpo) {\n  var pedidoVendaItens = [];\n\n  // BUSCA SÉRIE DO PEDIDO DE ACORDO COM CONFIGURADOR DO ERP\n  var seriePedido = $items(\"Parâmetros das empresas\").find(f=>f.json.codigoEmpresa == (pedido.json.chaveFilialFaturamento === null ? pedido.json.chaveFilial : pedido.json.chaveFilialFaturamento)).json.serieAtualPedidoVenda\n\n  // SE O CLIENTE UTILIZA DEPOSITO POR FILIAL, JÁ RESGATA O DEPÓSITO DA FILIAL DESSE PEDIDO\n  var depositoPorFilial = $items('Considera múltiplos depósitos')[0].json.valor === 'S'\n                          ? $items('Depósitos válidos por filial').find(f=>(pedido.json.chaveFilialFaturamento === null ? pedido.json.chaveFilial : pedido.json.chaveFilialFaturamento) == f.json.ValorOriginal) \n                          : undefined\n\n  /* SE FOI INFORMADO VALOR DE DESCONTO PARA O VALOR TOTAL DO PEDIDO (ABA FECHAMENTO DO CLOVER), CALCULO QUAL O PERCENTUAL DESSE DESCONTO EM RELAÇÃO AO VALOR TOTAL DO PEDIDO */\n  var percentualDescontoBonus = undefined\n  if (pedido.json.valorDescontoOuBonus > 0) {\n    percentualDescontoBonus = (pedido.json.valorDescontoOuBonus * 100) / pedido.json.valorTotalItens\n  }\n\n  for (itemPedido of items.filter(f=>f.json.chavePVPedido == pedido.json.chavePVPedido)) {\n    /* SE PEDIDO FOR EM MOEDA DIFERENTE DE 0 (REAL), ENVIAMOS O VALORUNITARIOOUTRAMOEDA */\n    var valorUnitarioOutraMoeda = undefined\n    var valorUnitario = undefined\n    if (pedido.json.chavePVMoeda !== \"0\" && pedido.json.chavePVMoeda) {\n      valorUnitarioOutraMoeda = utilizaValorUnitarioLiquido === \"S\" ? itemPedido.json.valorUnitarioTabelaPreco : itemPedido.json.valorUnitarioLiquido\n    } else {\n      valorUnitario = utilizaValorUnitarioLiquido === \"S\" ? itemPedido.json.valorUnitarioTabelaPreco : itemPedido.json.valorUnitarioLiquido\n    }\n\n    /* SE TEVE DESCONTO NO FECHAMENTO, CALCULO O VALOR DO DESCONTO NO VALOR TOTAL DE CADA ITEM E DIVIDO PELA QUANTIDADE POIS O ERP ESPERA O DESCONTO UNITÁRIO */\n    /* TAMBÉM VERIFICO SE UTILIZA VALOR UNITARIO DA TABELA PORQUE QUANDO NÃO UTILIZA NÃO É ENVIADO NENHUM TIPO DE DESCONTO OU ACRÉSCIMO */\n    var valorDescontoBonus = 0\n    if (percentualDescontoBonus !== undefined && utilizaValorUnitarioLiquido === \"S\") {\n      var valorTotalItem = itemPedido.json.valorUnitarioTabelaPreco * itemPedido.json.quantidade\n      valorDescontoBonus = (((valorTotalItem * percentualDescontoBonus) / 100) * -1) / itemPedido.json.quantidade\n    }\n\n    var cultura = undefined\n    /* SE TIVER CULTURA VINCULADA NO ITEM, MANDA DO ITEM, SE NÃO MANDA DO CABEÇALHO */\n    if (itemPedido.json.chaveCultura !== null) {\n      cultura = itemPedido.json.chaveCultura\n    } else {\n      cultura = pedido.json.chaveCultura\n    }\n\n    var tipoFinanceiro = itemPedido.json.tipoFinanceiro\n\n    pedidoVendaItens.push({\n      \"produto\": itemPedido.json.chaveProduto,\n      \"tabelaPreco\": parseInt(itemPedido.json.chavePVTabelaPreco),\n      \"deposito\": $items('Considera múltiplos depósitos')[0].json.valor == 'S' \n                  ? depositoPorFilial ? depositoPorFilial.json.ValorEquivalente : null \n                  : $items('Deposito padrão')[0].json.valor,\n      \"quantidade\": itemPedido.json.quantidade,\n      \"valorUnitarioOutraMoeda\": valorUnitarioOutraMoeda,\n      \"valorUnitario\": valorUnitario,\n      \"cultura\": cultura > 0 ? cultura : undefined,\n      \"descontoAcrescimo\": utilizaValorUnitarioLiquido === \"S\" ?\n        itemPedido.json.acrescimoValor > 0 ?\n          itemPedido.json.acrescimoValor :\n          itemPedido.json.descontoTotal > 0 || valorDescontoBonus !== 0 ?\n            itemPedido.json.descontoTotal > 0 ? (itemPedido.json.descontoTotal * -1) + valorDescontoBonus : valorDescontoBonus : 0\n        : 0,\n      \"dataPrevisaoEntrega\": itemPedido.json.dataPrevisaoEntrega !== null ? formatarData(itemPedido.json.dataPrevisaoEntrega) : null,\n    });\n  }\n\n  var vencimento = tipoFinanceiro === 2 ? pedido.json.dataBaseCondicao : pedido.json.dataVencimento\n\n  newItems.push({\n    json: {\n      \"chavePVPedido\": Number(pedido.json.chavePVPedido),\n      \"usuarioPedido\": pedido.json.usuarioPedido,\n      \"empresa\": Number((pedido.json.chaveFilialFaturamento === null ? pedido.json.chaveFilial : pedido.json.chaveFilialFaturamento)),\n      \"serie\": seriePedido,\n      \"pedidoOriginal\": `${pedido.json.codigo}`,\n      \"operacao\": Number(pedido.json.tipoOperacao),\n      \"dataEmissao\": pedido.json.dataMovimento !== null ? formatarData(pedido.json.dataMovimento) : null,\n      \"parceiro\": Number(pedido.json.chaveParceiro),\n      \"condicaoPagamento\": Number(pedido.json.chavePVCondicaoPagamento),\n      \"primeiroVendedor\": Number(pedido.json.chaveUsuarioCadastro),\n      \"cfop\": Number(pedido.json.cfop),\n      \"formaPagamento\": pedido.json.chavePVTipoDocumentoCobranca,\n      \"vencimento\": vencimento !== null ? formatarData(vencimento) : null,\n      \"valorFrete\": pedido.json.valorTotalFreteItens,\n      \"tipoFrete\": pedido.json.pvFreteTipo,\n      \"observacao\": pedido.json.observacao,\n      \"ciclo\": pedido.json.chaveSafra === null ? undefined : Number(pedido.json.chaveSafra.toString().split(\"#\")[0]),\n      \"propriedade\": pedido.json.chaveLocalFaturamento == null ? undefined : Number(pedido.json.chaveLocalFaturamento.toString().split(\"#\")[1]),\n      \"indexador\": pedido.json.chavePVMoeda,\n      \"dataCotacao\": pedido.json.dataCotacao !== null ? formatarData(pedido.json.dataCotacao) : `${formatarData(new Date()).slice(0,10)} 00:00:00`,\n      \"pedidoVendaItens\": pedidoVendaItens\n    }\n  });\n}\n\nreturn newItems;\n\n// FUNCTIONS\nfunction formatarData(data) {\n  data = new Date(data)\n  \n  var dia = String(data.getDate()).padStart(2, '0');\n  var mes = String(data.getMonth() + 1).padStart(2, '0'); // Mês começa do zero\n  var ano = data.getFullYear();\n  var horas = String(data.getHours()).padStart(2, '0');\n  var minutos = String(data.getMinutes()).padStart(2, '0');\n  var segundos = String(data.getSeconds()).padStart(2, '0');\n  \n  //return ano+'-'+mes+'-'+dia+' '+horas+':'+minutos+':'+segundos\n  return dia + '/' + mes + '/' + ano + ' ' + horas + ':' + minutos + ':' + segundos;\n}"
+        },
+        "name": "Dados de pedidos para enviar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          5220,
+          -40
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "usuario",
+          "operation": "getAll"
+        },
+        "name": "Buscar usuarios",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          3540,
+          0
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "executeOnce": true,
+        "credentials": {
+          "ERPAgriBusinessApi": {
+            "id": "447",
+            "name": "AGB-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "number": [
+              {
+                "name": "funcionario",
+                "value": "={{$json[\"funcionario\"]}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "usuarioPedido",
+                "value": "={{$json[\"login\"]}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Dados de usuários",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          3740,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "chaveUsuarioCadastro",
+          "propertyName2": "funcionario",
+          "overwrite": "undefined"
+        },
+        "name": "Buscar login do usuário do pedido",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          3920,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "tabelaPreco",
+          "operation": "get",
+          "versions": "version3",
+          "id": "={{$json[\"chavePVTabelaPreco\"]}}"
+        },
+        "name": "Buscar tabela de preço",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          4580,
+          20
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "executeOnce": false,
+        "credentials": {
+          "ERPAgriBusinessApi": {
+            "id": "447",
+            "name": "AGB-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "keepOnlySet": true,
+          "values": {
+            "number": [
+              {
+                "name": "tipoFinanceiro",
+                "value": "={{Number($json[\"tipoFinanceiro\"])}}"
+              }
+            ],
+            "string": [
+              {
+                "name": "chavePVTabelaPreco",
+                "value": "={{$json.codigo}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Tipo financeiro da tabela",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          4800,
+          20
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "mergeByKey",
+          "propertyName1": "chavePVTabelaPreco",
+          "propertyName2": "chavePVTabelaPreco"
+        },
+        "name": "Buscar tipo financeiro",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.merge",
+        "position": [
+          5000,
+          -40
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "getPedidosAprovados",
+          "parameters": {}
+        },
+        "name": "Pedidos aprovados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.CloverCRM",
+        "position": [
+          1840,
+          -100
+        ],
+        "credentials": {
+          "CloverCRMApi": {
+            "id": "449",
+            "name": "Clover-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "61f28717-fad6-4ea9-8451-928bc9a75113"
+        },
+        "name": "Utiliza valor unitário liquido da tabela",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          2960,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "96771329-1f5c-420f-9070-cf0d71c3d83d"
+        },
+        "name": "Buscar quantidade de tentativas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          3880,
+          980
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000,
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "96771329-1f5c-420f-9070-cf0d71c3d83d"
+        },
+        "name": "Buscar número de tentativas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          280,
+          300
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "96771329-1f5c-420f-9070-cf0d71c3d83d",
+          "valor_variavel": "0"
+        },
+        "name": "Zerar número de tentativas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          640,
+          220
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "51d20313-0568-45e0-8c22-f15d0ae64d14",
+          "valor_variavel": "0"
+        },
+        "name": "Zerar ultimo pedido pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          840,
+          220
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{Number($json[\"valor\"])}}",
+                "operation": "largerEqual",
+                "value2": 10
+              }
+            ]
+          }
+        },
+        "name": "Validar quantidade de tentativas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          460,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "dd64adcb-e9cc-4ffc-a01d-ef8f6efdb93b",
+          "valor_variavel": "0"
+        },
+        "name": "Zerar correlation token",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          1020,
+          220
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "a842e165-6c6c-4d60-87c6-22e94d602a90"
+        },
+        "name": "Deposito padrão",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          2760,
+          -80
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "700fd43c-6eca-4191-95ae-5fd95cbcf908"
+        },
+        "name": "Considera múltiplos depósitos",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          2020,
+          -100
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {},
+        "name": "NoOp",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          2580,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596"
+        },
+        "name": "Depósitos válidos por filial",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.equivalencias",
+        "position": [
+          2400,
+          -120
+        ],
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "resource": "pedidoVenda",
+          "operation": "create",
+          "versions": "version1",
+          "empresa": "={{$json[\"empresa\"]}}",
+          "operacao": "={{$json[\"operacao\"]}}",
+          "dataEmissao": "={{$json[\"dataEmissao\"]}}",
+          "parceiro": "={{$json[\"parceiro\"]}}",
+          "condicaoPagamento": "={{$json[\"condicaoPagamento\"]}}",
+          "primeiroVendedor": "={{Number($json[\"primeiroVendedor\"])}}",
+          "cfop": "={{$json[\"cfop\"]}}",
+          "formaPagamento": "={{$json[\"formaPagamento\"]}}",
+          "vencimento": "={{$json[\"vencimento\"]}}",
+          "pedidoVendaItens": "={{$json[\"pedidoVendaItens\"]}}",
+          "parameters": {
+            "usuarioPedido": "={{$json[\"usuarioPedido\"]}}",
+            "serie": "={{$json[\"serie\"]}}",
+            "pedidoOriginal": "={{$json[\"pedidoOriginal\"]}}",
+            "valorFrete": "={{$json[\"valorFrete\"]}}",
+            "tipoFrete": "={{$json[\"tipoFrete\"]}}",
+            "tipoTransporte": "={{$json[\"tipoTransporte\"]}}",
+            "observacao": "={{$json[\"observacao\"]}}",
+            "ciclo": "={{$json[\"ciclo\"]}}",
+            "propriedade": "={{$json[\"propriedade\"]}}",
+            "indexador": "={{$json[\"indexador\"]}}",
+            "dataCotacao": "={{$json[\"dataCotacao\"]}}"
+          }
+        },
+        "name": "Inserir Pedido Venda",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          5640,
+          -40
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000,
+        "executeOnce": false,
+        "credentials": {
+          "ERPAgriBusinessApi": {
+            "id": "447",
+            "name": "AGB-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "retornoApi",
+          "correlationToken": "={{$json.correlationToken ? $json.correlationToken : $json[\"valor\"]}}"
+        },
+        "name": "Pegar resultado do envio",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          2300,
+          560
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000,
+        "credentials": {
+          "ERPAgriBusinessApi": {
+            "id": "447",
+            "name": "AGB-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{$json[\"tentativa\"]}}",
+                "value2": 10
+              }
+            ],
+            "string": [
+              {
+                "value1": "={{$json[\"status\"]}}",
+                "value2": "Pendente"
+              }
+            ]
+          }
+        },
+        "name": "Validar tentativas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          2740,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{Number($items(\"ChavePVPedido do último pedido pendente\")[0].json.valor) !== 0 && $items(\"ChavePVPedido do último pedido pendente\")[0].json.valor !== \"\"}}"
+              }
+            ]
+          }
+        },
+        "name": "Validar pedido pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1640,
+          320
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "dd64adcb-e9cc-4ffc-a01d-ef8f6efdb93b"
+        },
+        "name": "Buscar correlation token gravado",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          1860,
+          560
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "functionCode": "items[0].json.dadosEnviados = $items(\"Pega um pedido\",0,$runIndex)[0].json\r\nitems[0].json.pedidoEnviado = true\r\n\r\nreturn items"
+        },
+        "name": "Pegar dados enviados",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          5880,
+          -40
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json['valor']}}",
+                "value2": "S"
+              }
+            ]
+          }
+        },
+        "name": "Considera múltiplos depósitos?",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          2200,
+          -100
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "removeDuplicates",
+          "compare": "selectedFields",
+          "fieldsToCompare": {
+            "fields": [
+              {
+                "fieldName": "chavePVTabelaPreco"
+              }
+            ]
+          },
+          "options": {
+            "removeOtherFields": true
+          }
+        },
+        "name": "Remove chavePVTabelaPreco duplicada",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.itemLists",
+        "position": [
+          4340,
+          20
+        ]
+      },
+      {
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "name": "Pega um pedido",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.splitInBatches",
+        "position": [
+          5420,
+          -40
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"Validar erro\", 1, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+        },
+        "name": "ERROS",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          6540,
+          40
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\r\n\r\nconst newItems = []\r\n\r\nlet counter = 0;\r\ndo {\r\n  try {\r\n    const items = $items(\"Validar erro\", 0, counter).map(item => item.json);\r\n    allData.push.apply(allData,items);\r\n  } catch (error) {\r\n    for (itens of allData) {\r\n      newItems.push({json:itens})\r\n    }\r\n    \r\n    return newItems;  \r\n  }\r\n\r\n  counter++;\r\n} while(true);\r\n"
+        },
+        "name": "SUCESSO",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          6540,
+          -160
+        ]
+      },
+      {
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "tentativa",
+                "value": "={{$node[\"Gerar número de tentativa\"].json[\"tentativa\"] + 1}}"
+              }
+            ],
+            "boolean": [
+              {
+                "name": "pedidoEnviado",
+                "value": "={{$node['Gerar número de tentativa'].json['pedidoEnviado'] ? $node['Gerar número de tentativa'].json['pedidoEnviado'] : false}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Somar tentativa",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2520,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "values": {
+            "number": [
+              {
+                "name": "tentativa",
+                "value": "={{$json[\"tentativa\"] ? $json[\"tentativa\"] : 0}}"
+              }
+            ],
+            "boolean": [
+              {
+                "name": "pedidoEnviado",
+                "value": "={{$json['pedidoEnviado'] ? $json['pedidoEnviado'] : false}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Gerar número de tentativa",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2080,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "if(items[0].json.pedidoEnviado){\r\n  items[0].json.dadosEnviados = $items(\"Pegar dados enviados\")[0].json.dadosEnviados\r\n}else{\r\n  items[0].json.dadosEnviados =  {\r\n    \"chavePVPedido\": $items(\"ChavePVPedido do último pedido pendente\")[0].json.valor,\r\n    \"pedidoOriginal\": $items(\"Código do último pedido pendente\")[0].json.valor\r\n  }\r\n}\r\n\r\n// if($items(\"Validar pedido pendente\",0).length > 0) {\r\n//   items[0].json.dadosEnviados = $items(\"Pegar dados enviados\")[0].json.dadosEnviados\r\n// } else {\r\n//   items[0].json.dadosEnviados =  {\r\n//     \"chavePVPedido\": $items(\"ChavePVPedido do último pedido pendente\")[0].json.valor,\r\n//     \"pedidoOriginal\": $items(\"Código do último pedido pendente\")[0].json.valor\r\n//   }\r\n// }\r\nreturn items"
+        },
+        "name": "Pegar dados enviados1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          2980,
+          580
+        ]
+      },
+      {
+        "parameters": {
+          "message": "AGB retornou erro na inclusão do pedido, verifique os detalhes da execução!",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596"
+        },
+        "name": "Alerta erro pra inserção no ERP",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.alerta",
+        "position": [
+          6720,
+          40
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "message": "Requisição ficou pendente na SIAGRI API, verifique se o serviço \"SIAGRI.Transactionsprocessor.Service\" está em execução no servidor. Se já estiver, tente reinicia-lo. Se persistir, formalize um ticket.",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596"
+        },
+        "name": "Alerta requisições pendentes na SIAGRI API",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.alerta",
+        "position": [
+          3880,
+          800
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "dataType": "string",
+          "value1": "={{$json.status}}",
+          "rules": {
+            "rules": [
+              {
+                "value2": "Processado"
+              },
+              {
+                "value2": "Erro",
+                "output": 1
+              },
+              {
+                "value2": "Pendente",
+                "output": 2
+              }
+            ]
+          }
+        },
+        "name": "Verifica status",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.switch",
+        "position": [
+          3200,
+          580
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "postEnviadoERP",
+          "operation": "post",
+          "codigo": "={{$json[\"dadosEnviados\"][\"chavePVPedido\"]}}"
+        },
+        "name": "Atualizar status do pedido1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.CloverCRM",
+        "position": [
+          3880,
+          360
+        ],
+        "credentials": {
+          "CloverCRMApi": {
+            "id": "449",
+            "name": "Clover-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "name": "ERROS1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          3480,
+          560
+        ]
+      },
+      {
+        "parameters": {},
+        "name": "SUCESSO1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          3480,
+          360
+        ]
+      },
+      {
+        "parameters": {
+          "message": "AGB retornou erro na inclusão do pedido, verifique os detalhes da execução!",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596"
+        },
+        "name": "Alerta erro pra inserção no ERP1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.alerta",
+        "position": [
+          3880,
+          580
+        ]
+      },
+      {
+        "parameters": {},
+        "name": "PENDENTE",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.noOp",
+        "position": [
+          3480,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json[\"status\"]}}",
+                "operation": "notEqual",
+                "value2": "Pendente"
+              }
+            ],
+            "boolean": [
+              {
+                "value1": "={{$json[\"status\"] ? true : false}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Validar status pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          6100,
+          -40
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "dd64adcb-e9cc-4ffc-a01d-ef8f6efdb93b",
+          "valor_variavel": "={{$json.status == \"Pendente\" ? $json.correlationToken : 0}}"
+        },
+        "name": "Atualiza correlationToken",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          4480,
+          800
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "96771329-1f5c-420f-9070-cf0d71c3d83d",
+          "valor_variavel": "={{$json.valor ? Number($json['valor']) + 1 : 0}}"
+        },
+        "name": "Atualiza tentativas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          4480,
+          980
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000,
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$items(\"Pegar dados enviados1\",0)[0].json.pedidoEnviado}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Inicia ou continua?",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          4660,
+          480
+        ],
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{$json.resultMessage.includes(\"Pedido de Venda já cadastrado\")}}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Pedido de Venda já cadastrado?",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.if",
+        "position": [
+          3660,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "e9b83c4e-3e2e-4f56-ac97-f16203aac7c0",
+          "valor_variavel": "={{$json.status == \"Pendente\" ? $json.dadosEnviados.pedidoOriginal : 0}}"
+        },
+        "name": "Atualiza código do último pedido pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          4480,
+          340
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 1,
+          "variavelId": "51d20313-0568-45e0-8c22-f15d0ae64d14",
+          "valor_variavel": "={{$json.status == \"Pendente\" ? $json.dadosEnviados.chavePVPedido : 0}}"
+        },
+        "name": "Atualiza chavePVPedido do último pedido pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          4480,
+          580
+        ],
+        "retryOnFail": true,
+        "maxTries": 5,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "e9b83c4e-3e2e-4f56-ac97-f16203aac7c0"
+        },
+        "name": "Código do último pedido pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          1220,
+          320
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5REYzMzc0QkY0NkM0Q0EzN0FDOEEwRTVDMjVBNTI5NDhCMTM5Q0NSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6ImlkOHpkTDlHeE1vM3JJb09YQ1dsS1VpeE9jdyJ9.eyJuYmYiOjE3NDExNzg0NjMsImV4cCI6MTc0MTIwMDA2MywiaXNzIjoiaHR0cHM6Ly9hcGkucHJkLmFsaWFyZS5kaWdpdGFsL2FsaWFyZS1hdXRoIiwiYXVkIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJhbGlhcmUtaW50ZWdyYSIsIkFsaWFyZSBJbnRlZ3JhIiwibm90aWZpY2F0aW9uSHViIiwiYWxpYXJlLWJhY2tvZmZpY2UiXSwiY2xpZW50X2lkIjoiYWxpYXJlLWludGVncmEiLCJzdWIiOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJhdXRoX3RpbWUiOjE3NDExNzg0NTMsImlkcCI6ImxvY2FsIiwiSWREb1VzdWFyaW8iOiI1NzM1ZTlmMy1kOTgyLTRjYmQtOTdjMy1kNmNiNzRiMzZlOWQiLCJlbWFpbCI6Indlc2xsZXkubWFyaWFub0BhbGlhcmUuY28iLCJUZW5hbnQiOiJmYWZjYTY0Zi1hNTNiLTQ3OGUtOTBiMi05OGYwZThlOTVjYWMiLCJMZXZlbCI6Ik4wIiwiQWxsVGVuYW50cyI6Ikg0c0lBQUFBQUFBQUEzM1BzV3FETVF3RTRIZnhISUV0eTdLVU55aUVUdDFLQjFtV3BwS3BaQ2w1OS94am15SGp3ZkZ4OS9sYlB1SnExNSszWGM0bExkMllFbXowQlRRbFFPdENVTWthRWpyY3ZKektKVzd4ZmRUZmE3bWYvZ0crSnRzZUU2cnpBS3JLc05yZVIvUzVOelBueEw4QVBnT29PZ2ozZ0JxZGdab1lTR1lIVVd6WmxvcVN2d1JTRUxlbFF0UWxRQ0VMRm5jRnNra3llZFNlOGhJSW9XNk5CdkJnT2k0a2dTVk9FRTlobkM1bXp3dStIdHFLY2hkR0FRQUEiLCJqdGkiOiJGQzJBRjI0NEM0MEY5NDAyOTNDNTFDOEZGRDI2MjMzRiIsInNpZCI6IjVBRDVDOTFCRDE4NkUxMUU0NDdBQ0NGODU3MDMwOEMxIiwiaWF0IjoxNzQxMTc4NDYzLCJzY29wZSI6WyJub3RpZmljYXRpb25IdWIiLCJhbGlhcmUtYmFja29mZmljZSIsImFsaWFyZS1pbnRlZ3JhIiwib3BlbmlkIiwicHJvZmlsZSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.SjJHbpGaDdNpA7MyBtmiDuhRWiekhUqM-CvJUL21zEy0D3ZKpAItyNJOfGOdB49UOvTQyM99zRxl_KtFshNg8JN4jd5ora-e_V-u0i2P6jXtZ8kxtHtpAf2OJabbeExz66TIcTkI356vQKwOY21fb_i3EkfrNpBXe3kg0e6NyS_dB5TM49oDk2NmxF7ggDQFvsGKViO7qCnxoTPg5JYKn5PiGJn6BZqmU7tmMlQYlgph7vhiaRI7QypYnTHIcZFyDE8Qj0eiD5JRFSiFC17NTIJ1-rhB2vDX8BwA8PU_GlI2aiY9vWu3xUJJ6MOvtClZPT_3w44YBPtXO_5KjV4zKg",
+          "tenantId": "055386a2-3bb2-45d5-ad8a-824edffcd604",
+          "workflowId": "2629e6d4-e86b-4395-9f0e-a84f2930b95f",
+          "workspaceId": "2c5dcd64-4517-4ff8-81e9-0c02fdc16596",
+          "resource": 2,
+          "variavelId": "51d20313-0568-45e0-8c22-f15d0ae64d14"
+        },
+        "name": "ChavePVPedido do último pedido pendente",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.variaveis",
+        "position": [
+          1440,
+          320
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "resource": "parametrosempresas"
+        },
+        "name": "Parâmetros das empresas",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.ERPAgriBusiness",
+        "position": [
+          3160,
+          -80
+        ],
+        "executeOnce": true,
+        "credentials": {
+          "ERPAgriBusinessApi": {
+            "id": "447",
+            "name": "AGB-HMLG"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "functionCode": "// FILTRA PEDIDOS DE TROCA E PARCEIROS VÁLIDOS\nreturn $items(\"Pedidos aprovados\").filter(f=>f.json.chaveParceiro.split(\"#\").length === 1 && f.json.troca  == false)"
+        },
+        "name": "Filtra pedidos válidos",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          3360,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "var msg = \"\";\nmsg = `<b>ATENÇÃO: ${items.length} pedido(s) não foram exportados para o ERP AgriBusiness.</b><br><br>\n       <b>ID da execução:</b> ${$executionId}<br><hr><br>`;\n\nfor (item of items){\n\n  var codigoPedido = item.json.dadosEnviados['pedidoOriginal'];\n  var correlationToken = item.json.correlationToken;\n  var msgRetorno = item.json['resultMessage'];\n  var dataEnvio = item.json.createdDate;\n  var dataProc = item.json.processedDate\n\n\n\n  msg += `<strong>- Número do pedido:</strong> ${codigoPedido}<br>`;\n  msg += `<strong>- CorrelationToken:</strong> ${correlationToken}<br>`\n\tmsg += `<strong>- Retorno:</strong> ${msgRetorno}<br>`\n\tmsg += `<strong>- Data de envio do pedido via Siagri API:</strong> ${dataEnvio}<br>`\n\tmsg += `<strong>- Data de processamento do pedido via Siagri API:</strong> ${dataProc}<br>`\n\tmsg += '<br><hr><br>'\n\n}\n\nreturn [{msg}];"
+        },
+        "name": "Trata msg envio e-mail",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          4720,
+          740
+        ]
+      },
+      {
+        "parameters": {
+          "fromEmail": "no-reply@aliareintegra.com.br",
+          "toEmail": "higor.rocha@hubconexa.com",
+          "subject": "[ALIARE INTEGRA] AGB <> Clover | Erro na regra de negócio para exportação do pedido",
+          "html": "=<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html dir=\"ltr\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" lang=\"en\">\n <head>\n  <meta charset=\"UTF-8\">\n  <meta content=\"width=device-width, initial-scale=1\" name=\"viewport\">\n  <meta name=\"x-apple-disable-message-reformatting\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n  <meta content=\"telephone=no\" name=\"format-detection\">\n  <title>New email template 2024-03-14</title><!--[if (mso 16)]>\n    <style type=\"text/css\">\n    a {text-decoration: none;}\n    </style>\n    <![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if gte mso 9]>\n<xml>\n    <o:OfficeDocumentSettings>\n    <o:AllowPNG></o:AllowPNG>\n    <o:PixelsPerInch>96</o:PixelsPerInch>\n    </o:OfficeDocumentSettings>\n</xml>\n<![endif]--><!--[if !mso]><!-- -->\n  <link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]-->\n  <style type=\"text/css\">\n.rollover:hover .rollover-first {\n\tmax-height:0px!important;\n\tdisplay:none!important;\n}\n.rollover:hover .rollover-second {\n\tmax-height:none!important;\n\tdisplay:block!important;\n}\n#outlook a {\n\tpadding:0;\n}\n.es-button {\n\tmso-style-priority:100!important;\n\ttext-decoration:none!important;\n}\na[x-apple-data-detectors] {\n\tcolor:inherit!important;\n\ttext-decoration:none!important;\n\tfont-size:inherit!important;\n\tfont-family:inherit!important;\n\tfont-weight:inherit!important;\n\tline-height:inherit!important;\n}\n.es-desk-hidden {\n\tdisplay:none;\n\tfloat:left;\n\toverflow:hidden;\n\twidth:0;\n\tmax-height:0;\n\tline-height:0;\n\tmso-hide:all;\n}\n.es-button-border:hover {\n\tborder-style:solid solid solid solid!important;\n\tbackground:#0b317e!important;\n\tborder-color:#42d159 #42d159 #42d159 #42d159!important;\n}\n.es-button-border:hover a.es-button, .es-button-border:hover button.es-button {\n\tbackground:#0b317e!important;\n}\n@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120%!important } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .st-br { padding-left:10px!important; padding-right:10px!important } h1 a { text-align:center } .es-header-body h1 a, .es-content-body h1 a, .es-footer-body h1 a { font-size:30px!important } h2 a { text-align:center } .es-header-body h2 a, .es-content-body h2 a, .es-footer-body h2 a { font-size:26px!important } h3 a { text-align:center } .es-header-body h3 a, .es-content-body h3 a, .es-footer-body h3 a { font-size:20px!important } .es-menu td a { font-size:14px!important } .es-header-body p, .es-header-body ul li, .es-header-body ol li, .es-header-body a { font-size:16px!important } .es-content-body p, .es-content-body ul li, .es-content-body ol li, .es-content-body a { font-size:16px!important } .es-footer-body p, .es-footer-body ul li, .es-footer-body ol li, .es-footer-body a { font-size:14px!important } .es-infoblock p, .es-infoblock ul li, .es-infoblock ol li, .es-infoblock a { font-size:12px!important } *[class=\"gmail-fix\"] { display:none!important } .es-m-txt-c, .es-m-txt-c h1, .es-m-txt-c h2, .es-m-txt-c h3 { text-align:center!important } .es-m-txt-r, .es-m-txt-r h1, .es-m-txt-r h2, .es-m-txt-r h3 { text-align:right!important } .es-m-txt-l, .es-m-txt-l h1, .es-m-txt-l h2, .es-m-txt-l h3 { text-align:left!important } .es-m-txt-r img, .es-m-txt-c img, .es-m-txt-l img { display:inline!important } .es-button-border { display:block!important } a.es-button, button.es-button { font-size:16px!important; display:block!important; border-left-width:0px!important; border-right-width:0px!important } .es-adaptive table, .es-left, .es-right { width:100%!important } .es-content table, .es-header table, .es-footer table, .es-content, .es-footer, .es-header { width:100%!important; max-width:600px!important } .es-adapt-td { display:block!important; width:100%!important } .adapt-img { width:100%!important; height:auto!important } .es-m-p0 { padding:0!important } .es-m-p0r { padding-right:0!important } .es-m-p0l { padding-left:0!important } .es-m-p0t { padding-top:0!important } .es-m-p0b { padding-bottom:0!important } .es-m-p20b { padding-bottom:20px!important } .es-mobile-hidden, .es-hidden { display:none!important } tr.es-desk-hidden, td.es-desk-hidden, table.es-desk-hidden { width:auto!important; overflow:visible!important; float:none!important; max-height:inherit!important; line-height:inherit!important } tr.es-desk-hidden { display:table-row!important } table.es-desk-hidden { display:table!important } td.es-desk-menu-hidden { display:table-cell!important } table.es-table-not-adapt, .esd-block-html table { width:auto!important } table.es-social { display:inline-block!important } table.es-social td { display:inline-block!important } .es-m-p5 { padding:5px!important } .es-m-p5t { padding-top:5px!important } .es-m-p5b { padding-bottom:5px!important } .es-m-p5r { padding-right:5px!important } .es-m-p5l { padding-left:5px!important } .es-m-p10 { padding:10px!important } .es-m-p10t { padding-top:10px!important } .es-m-p10b { padding-bottom:10px!important } .es-m-p10r { padding-right:10px!important } .es-m-p10l { padding-left:10px!important } .es-m-p15 { padding:15px!important } .es-m-p15t { padding-top:15px!important } .es-m-p15b { padding-bottom:15px!important } .es-m-p15r { padding-right:15px!important } .es-m-p15l { padding-left:15px!important } .es-m-p20 { padding:20px!important } .es-m-p20t { padding-top:20px!important } .es-m-p20r { padding-right:20px!important } .es-m-p20l { padding-left:20px!important } .es-m-p25 { padding:25px!important } .es-m-p25t { padding-top:25px!important } .es-m-p25b { padding-bottom:25px!important } .es-m-p25r { padding-right:25px!important } .es-m-p25l { padding-left:25px!important } .es-m-p30 { padding:30px!important } .es-m-p30t { padding-top:30px!important } .es-m-p30b { padding-bottom:30px!important } .es-m-p30r { padding-right:30px!important } .es-m-p30l { padding-left:30px!important } .es-m-p35 { padding:35px!important } .es-m-p35t { padding-top:35px!important } .es-m-p35b { padding-bottom:35px!important } .es-m-p35r { padding-right:35px!important } .es-m-p35l { padding-left:35px!important } .es-m-p40 { padding:40px!important } .es-m-p40t { padding-top:40px!important } .es-m-p40b { padding-bottom:40px!important } .es-m-p40r { padding-right:40px!important } .es-m-p40l { padding-left:40px!important } .es-desk-hidden { display:table-row!important; width:auto!important; overflow:visible!important; max-height:inherit!important } }\n@media screen and (max-width:384px) {.mail-message-content { width:414px!important } }\n</style>\n </head>\n <body style=\"width:100%;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0\">\n  <div dir=\"ltr\" class=\"es-wrapper-color\" lang=\"en\" style=\"background-color:#F8F9FD\"><!--[if gte mso 9]>\n\t\t\t<v:background xmlns:v=\"urn:schemas-microsoft-com:vml\" fill=\"t\">\n\t\t\t\t<v:fill type=\"tile\" color=\"#f8f9fd\"></v:fill>\n\t\t\t</v:background>\n\t\t<![endif]-->\n   <table class=\"es-wrapper\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;padding:0;Margin:0;width:100%;height:100%;background-repeat:repeat;background-position:center top;background-color:#F8F9FD\">\n     <tr>\n      <td valign=\"top\" style=\"padding:0;Margin:0\">\n       <table cellpadding=\"0\" cellspacing=\"0\" class=\"es-content\" align=\"center\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;table-layout:fixed !important;width:100%\">\n         <tr>\n          <td align=\"center\" style=\"padding:0;Margin:0\">\n           <table bgcolor=\"#FFFFFF\" class=\"es-content-body\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:transparent;border-top:1px solid #333333;border-right:1px solid #333333;border-left:1px solid #333333;width:600px;border-bottom:1px solid #333333\">\n             <tr>\n              <td align=\"left\" style=\"Margin:0;padding-bottom:15px;padding-top:30px;padding-left:30px;padding-right:30px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:538px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0\"><p style=\"Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:helvetica, 'helvetica neue', arial, verdana, sans-serif;line-height:26px;color:#131313;font-size:26px\"><strong>aliare&nbsp;<br>INTEGRA</strong></p></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"padding:0;Margin:0;padding-left:5px;padding-right:5px;padding-top:20px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:588px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0;font-size:0\">\n                       <table border=\"0\" width=\"20%\" height=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                         <tr>\n                          <td style=\"padding:0;Margin:0;border-bottom:1px solid #cccccc;background:unset;height:1px;width:100%;margin:0px\"></td>\n                         </tr>\n                       </table></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"padding:0;Margin:0;padding-top:20px;padding-left:20px;padding-right:20px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:558px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0\"><p style=\"Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:helvetica, 'helvetica neue', arial, verdana, sans-serif;line-height:30px;color:#131313;font-size:20px\">Exportação de Pedidos</p></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"padding:0;Margin:0;padding-left:5px;padding-right:5px;padding-top:20px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:588px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0;font-size:0\">\n                       <table border=\"0\" width=\"20%\" height=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                         <tr>\n                          <td style=\"padding:0;Margin:0;border-bottom:1px solid #cccccc;background:unset;height:1px;width:100%;margin:0px\"></td>\n                         </tr>\n                       </table></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"Margin:0;padding-top:20px;padding-left:20px;padding-right:20px;padding-bottom:30px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:558px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0\">\n\t\t\t\t\t\t<p style=\"Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:helvetica, 'helvetica neue', arial, verdana, sans-serif;line-height:24px;color:#131313;font-size:16px\">{{$json[\"msg\"]}}</p>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n           </table></td>\n         </tr>\n       </table></td>\n     </tr>\n   </table>\n  </div>\n </body>\n</html>",
+          "options": {}
+        },
+        "name": "Envia e-mail de erro de regra de negócio",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          4940,
+          740
+        ],
+        "alwaysOutputData": true,
+        "disabled": true,
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "functionCode": "var msg = \"\";\nvar enumeracao = 0\n\nmsg = `<b>ATENÇÃO: ${items.length} pedido(s) ficaram com a requisição pendente na SIAGRI API.</b><br><br><hr><br>\n       <b>ID da execução:</b> ${$executionId}<br><br>\n       Quando uma requisição fica pendente, o registro fica armazenado em uma fila entre a Siagri API e ERP que pode ter sido processada após a execução do fluxo. Neste caso, temos 3 possibilidades:<br><br>\n       <b>1.</b> A requisição foi processada posteriormente e o(s) pedido(s) foram integrados no ERP, confirme se o(s) pedido(s) já se encontram no ERP.<br><br>\n       <b>2.</b> A requisição foi processada posteriormente e o(s) pedido(s) apresentaram erro de regra de negócio para integrar no ERP, confirme se você já recebeu outro e-mail com o(s) erro(s) desse(s) número(s) de pedido(s).<br><br>\n       <b>3.</b> A requisição continua pendente na SIAGRI API, nesse caso, temos uma dificuldade no serviço da SIAGRI API que processa essas transações, sendo necessário abrir um ticket no https://atendimento.siagri.com.br para que o time responsável verifique. OBS: Lembre-se de anexar as informações abaixo no ticket.<br><br><hr><br>\n       \n       <b>INFORMAÇÕES DAS TRANSAÇÕES PENDENTES</b><br><br>`;\nfor (item of items){\n  enumeracao++\n\n  var codigoPedido = item.json.dadosEnviados['pedidoOriginal'];\n  var correlationToken = item.json.correlationToken;\n  var dataEnvio = item.json.createdDate;\n\n  msg += `<strong>- TRANSAÇÃO ${enumeracao}</strong><br><br>`;\n  msg += `<strong>- Número do pedido:</strong> ${codigoPedido}<br>`;\n  msg += `<strong>- CorrelationToken:</strong> ${correlationToken}<br>`\n\tmsg += `<strong>- Data de envio do pedido via Siagri API:</strong> ${dataEnvio}<br>`\n\tmsg += '<br><br>'\n\n}\n\nreturn [{msg}];"
+        },
+        "name": "Trata msg envio e-mail1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          4720,
+          940
+        ]
+      },
+      {
+        "parameters": {
+          "fromEmail": "no-reply@aliareintegra.com.br",
+          "toEmail": "higor.rocha@hubconexa.com",
+          "subject": "[ALIARE INTEGRA] AGB <> Clover | Requisição pendente na SIAGRI API",
+          "html": "=<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html dir=\"ltr\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" lang=\"en\">\n <head>\n  <meta charset=\"UTF-8\">\n  <meta content=\"width=device-width, initial-scale=1\" name=\"viewport\">\n  <meta name=\"x-apple-disable-message-reformatting\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n  <meta content=\"telephone=no\" name=\"format-detection\">\n  <title>New email template 2024-03-14</title><!--[if (mso 16)]>\n    <style type=\"text/css\">\n    a {text-decoration: none;}\n    </style>\n    <![endif]--><!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]--><!--[if gte mso 9]>\n<xml>\n    <o:OfficeDocumentSettings>\n    <o:AllowPNG></o:AllowPNG>\n    <o:PixelsPerInch>96</o:PixelsPerInch>\n    </o:OfficeDocumentSettings>\n</xml>\n<![endif]--><!--[if !mso]><!-- -->\n  <link href=\"https://fonts.googleapis.com/css?family=Roboto:400,400i,700,700i\" rel=\"stylesheet\"><!--<![endif]-->\n  <style type=\"text/css\">\n.rollover:hover .rollover-first {\n\tmax-height:0px!important;\n\tdisplay:none!important;\n}\n.rollover:hover .rollover-second {\n\tmax-height:none!important;\n\tdisplay:block!important;\n}\n#outlook a {\n\tpadding:0;\n}\n.es-button {\n\tmso-style-priority:100!important;\n\ttext-decoration:none!important;\n}\na[x-apple-data-detectors] {\n\tcolor:inherit!important;\n\ttext-decoration:none!important;\n\tfont-size:inherit!important;\n\tfont-family:inherit!important;\n\tfont-weight:inherit!important;\n\tline-height:inherit!important;\n}\n.es-desk-hidden {\n\tdisplay:none;\n\tfloat:left;\n\toverflow:hidden;\n\twidth:0;\n\tmax-height:0;\n\tline-height:0;\n\tmso-hide:all;\n}\n.es-button-border:hover {\n\tborder-style:solid solid solid solid!important;\n\tbackground:#0b317e!important;\n\tborder-color:#42d159 #42d159 #42d159 #42d159!important;\n}\n.es-button-border:hover a.es-button, .es-button-border:hover button.es-button {\n\tbackground:#0b317e!important;\n}\n@media only screen and (max-width:600px) {p, ul li, ol li, a { line-height:150%!important } h1, h2, h3, h1 a, h2 a, h3 a { line-height:120%!important } h1 { font-size:30px!important; text-align:center } h2 { font-size:26px!important; text-align:center } h3 { font-size:20px!important; text-align:center } .st-br { padding-left:10px!important; padding-right:10px!important } h1 a { text-align:center } .es-header-body h1 a, .es-content-body h1 a, .es-footer-body h1 a { font-size:30px!important } h2 a { text-align:center } .es-header-body h2 a, .es-content-body h2 a, .es-footer-body h2 a { font-size:26px!important } h3 a { text-align:center } .es-header-body h3 a, .es-content-body h3 a, .es-footer-body h3 a { font-size:20px!important } .es-menu td a { font-size:14px!important } .es-header-body p, .es-header-body ul li, .es-header-body ol li, .es-header-body a { font-size:16px!important } .es-content-body p, .es-content-body ul li, .es-content-body ol li, .es-content-body a { font-size:16px!important } .es-footer-body p, .es-footer-body ul li, .es-footer-body ol li, .es-footer-body a { font-size:14px!important } .es-infoblock p, .es-infoblock ul li, .es-infoblock ol li, .es-infoblock a { font-size:12px!important } *[class=\"gmail-fix\"] { display:none!important } .es-m-txt-c, .es-m-txt-c h1, .es-m-txt-c h2, .es-m-txt-c h3 { text-align:center!important } .es-m-txt-r, .es-m-txt-r h1, .es-m-txt-r h2, .es-m-txt-r h3 { text-align:right!important } .es-m-txt-l, .es-m-txt-l h1, .es-m-txt-l h2, .es-m-txt-l h3 { text-align:left!important } .es-m-txt-r img, .es-m-txt-c img, .es-m-txt-l img { display:inline!important } .es-button-border { display:block!important } a.es-button, button.es-button { font-size:16px!important; display:block!important; border-left-width:0px!important; border-right-width:0px!important } .es-adaptive table, .es-left, .es-right { width:100%!important } .es-content table, .es-header table, .es-footer table, .es-content, .es-footer, .es-header { width:100%!important; max-width:600px!important } .es-adapt-td { display:block!important; width:100%!important } .adapt-img { width:100%!important; height:auto!important } .es-m-p0 { padding:0!important } .es-m-p0r { padding-right:0!important } .es-m-p0l { padding-left:0!important } .es-m-p0t { padding-top:0!important } .es-m-p0b { padding-bottom:0!important } .es-m-p20b { padding-bottom:20px!important } .es-mobile-hidden, .es-hidden { display:none!important } tr.es-desk-hidden, td.es-desk-hidden, table.es-desk-hidden { width:auto!important; overflow:visible!important; float:none!important; max-height:inherit!important; line-height:inherit!important } tr.es-desk-hidden { display:table-row!important } table.es-desk-hidden { display:table!important } td.es-desk-menu-hidden { display:table-cell!important } table.es-table-not-adapt, .esd-block-html table { width:auto!important } table.es-social { display:inline-block!important } table.es-social td { display:inline-block!important } .es-m-p5 { padding:5px!important } .es-m-p5t { padding-top:5px!important } .es-m-p5b { padding-bottom:5px!important } .es-m-p5r { padding-right:5px!important } .es-m-p5l { padding-left:5px!important } .es-m-p10 { padding:10px!important } .es-m-p10t { padding-top:10px!important } .es-m-p10b { padding-bottom:10px!important } .es-m-p10r { padding-right:10px!important } .es-m-p10l { padding-left:10px!important } .es-m-p15 { padding:15px!important } .es-m-p15t { padding-top:15px!important } .es-m-p15b { padding-bottom:15px!important } .es-m-p15r { padding-right:15px!important } .es-m-p15l { padding-left:15px!important } .es-m-p20 { padding:20px!important } .es-m-p20t { padding-top:20px!important } .es-m-p20r { padding-right:20px!important } .es-m-p20l { padding-left:20px!important } .es-m-p25 { padding:25px!important } .es-m-p25t { padding-top:25px!important } .es-m-p25b { padding-bottom:25px!important } .es-m-p25r { padding-right:25px!important } .es-m-p25l { padding-left:25px!important } .es-m-p30 { padding:30px!important } .es-m-p30t { padding-top:30px!important } .es-m-p30b { padding-bottom:30px!important } .es-m-p30r { padding-right:30px!important } .es-m-p30l { padding-left:30px!important } .es-m-p35 { padding:35px!important } .es-m-p35t { padding-top:35px!important } .es-m-p35b { padding-bottom:35px!important } .es-m-p35r { padding-right:35px!important } .es-m-p35l { padding-left:35px!important } .es-m-p40 { padding:40px!important } .es-m-p40t { padding-top:40px!important } .es-m-p40b { padding-bottom:40px!important } .es-m-p40r { padding-right:40px!important } .es-m-p40l { padding-left:40px!important } .es-desk-hidden { display:table-row!important; width:auto!important; overflow:visible!important; max-height:inherit!important } }\n@media screen and (max-width:384px) {.mail-message-content { width:414px!important } }\n</style>\n </head>\n <body style=\"width:100%;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0\">\n  <div dir=\"ltr\" class=\"es-wrapper-color\" lang=\"en\" style=\"background-color:#F8F9FD\"><!--[if gte mso 9]>\n\t\t\t<v:background xmlns:v=\"urn:schemas-microsoft-com:vml\" fill=\"t\">\n\t\t\t\t<v:fill type=\"tile\" color=\"#f8f9fd\"></v:fill>\n\t\t\t</v:background>\n\t\t<![endif]-->\n   <table class=\"es-wrapper\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;padding:0;Margin:0;width:100%;height:100%;background-repeat:repeat;background-position:center top;background-color:#F8F9FD\">\n     <tr>\n      <td valign=\"top\" style=\"padding:0;Margin:0\">\n       <table cellpadding=\"0\" cellspacing=\"0\" class=\"es-content\" align=\"center\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;table-layout:fixed !important;width:100%\">\n         <tr>\n          <td align=\"center\" style=\"padding:0;Margin:0\">\n           <table bgcolor=\"#FFFFFF\" class=\"es-content-body\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:transparent;border-top:1px solid #333333;border-right:1px solid #333333;border-left:1px solid #333333;width:600px;border-bottom:1px solid #333333\">\n             <tr>\n              <td align=\"left\" style=\"Margin:0;padding-bottom:15px;padding-top:30px;padding-left:30px;padding-right:30px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:538px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0\"><p style=\"Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:helvetica, 'helvetica neue', arial, verdana, sans-serif;line-height:26px;color:#131313;font-size:26px\"><strong>aliare&nbsp;<br>INTEGRA</strong></p></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"padding:0;Margin:0;padding-left:5px;padding-right:5px;padding-top:20px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:588px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0;font-size:0\">\n                       <table border=\"0\" width=\"20%\" height=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                         <tr>\n                          <td style=\"padding:0;Margin:0;border-bottom:1px solid #cccccc;background:unset;height:1px;width:100%;margin:0px\"></td>\n                         </tr>\n                       </table></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"padding:0;Margin:0;padding-top:20px;padding-left:20px;padding-right:20px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:558px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0\"><p style=\"Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:helvetica, 'helvetica neue', arial, verdana, sans-serif;line-height:30px;color:#131313;font-size:20px\">Exportação de Pedidos</p></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"padding:0;Margin:0;padding-left:5px;padding-right:5px;padding-top:20px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:588px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0;font-size:0\">\n                       <table border=\"0\" width=\"20%\" height=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                         <tr>\n                          <td style=\"padding:0;Margin:0;border-bottom:1px solid #cccccc;background:unset;height:1px;width:100%;margin:0px\"></td>\n                         </tr>\n                       </table></td>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n             <tr>\n              <td align=\"left\" style=\"Margin:0;padding-top:20px;padding-left:20px;padding-right:20px;padding-bottom:30px\">\n               <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                 <tr>\n                  <td align=\"center\" valign=\"top\" style=\"padding:0;Margin:0;width:558px\">\n                   <table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px\">\n                     <tr>\n                      <td align=\"left\" style=\"padding:0;Margin:0\">\n\t\t\t\t\t\t<p style=\"Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:helvetica, 'helvetica neue', arial, verdana, sans-serif;line-height:24px;color:#131313;font-size:16px\">{{$json[\"msg\"]}}</p>\n                     </tr>\n                   </table></td>\n                 </tr>\n               </table></td>\n             </tr>\n           </table></td>\n         </tr>\n       </table></td>\n     </tr>\n   </table>\n  </div>\n </body>\n</html>",
+          "options": {}
+        },
+        "name": "Envia e-mail de requisições pendentes",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.emailSend",
+        "position": [
+          4940,
+          940
+        ],
+        "alwaysOutputData": true,
+        "disabled": true,
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "amount": 20,
+          "unit": "seconds"
+        },
+        "name": "Pausar",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          2740,
+          740
+        ],
+        "webhookId": "0f9243d0-7b44-430c-9e43-b2001295fe05"
+      },
+      {
+        "parameters": {
+          "functionCode": "const allData = []\n\nconst newItems = []\n\nlet counter = 0;\ndo {\n  try {\n    const items = $items(\"ERROS\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n\ncounter = 0;\ndo {\n  try {\n    const items = $items(\"ERROS1\", 0, counter).map(item => item.json);\n    allData.push.apply(allData,items);\n    //allData.push($items(\"Increment\", 0, counter));\n  } catch (error) {\n    for (itens of allData) {\n      newItems.push({json:itens})\n    }\n    \n    return newItems;  \n  }\n\n  counter++;\n} while(true);\n"
+        },
+        "name": "Unir aplicações",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.function",
+        "position": [
+          7160,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "value": 5,
+                "unit": "minutes"
+              }
+            ]
+          }
+        },
+        "name": "Agendar Execução1",
+        "typeVersion": 1,
+        "type": "n8n-nodes-base.cron",
+        "position": [
+          80,
+          400
+        ]
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Buscar número de tentativas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar item(ns) do pedido": {
+        "main": [
+          [
+            {
+              "node": "Remove chavePVTabelaPreco duplicada",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar tipo financeiro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar se há pedidos para enviar": {
+        "main": [
+          [
+            {
+              "node": "Unir aplicações",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Pega um pedido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar erro": {
+        "main": [
+          [
+            {
+              "node": "SUCESSO",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "ERROS",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar status do pedido": {
+        "main": [
+          [
+            {
+              "node": "Validar se há pedidos para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dados de pedidos para enviar": {
+        "main": [
+          [
+            {
+              "node": "Pega um pedido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar usuarios": {
+        "main": [
+          [
+            {
+              "node": "Dados de usuários",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dados de usuários": {
+        "main": [
+          [
+            {
+              "node": "Buscar login do usuário do pedido",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Buscar login do usuário do pedido": {
+        "main": [
+          [
+            {
+              "node": "Buscar item(ns) do pedido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar tabela de preço": {
+        "main": [
+          [
+            {
+              "node": "Tipo financeiro da tabela",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tipo financeiro da tabela": {
+        "main": [
+          [
+            {
+              "node": "Buscar tipo financeiro",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Buscar tipo financeiro": {
+        "main": [
+          [
+            {
+              "node": "Dados de pedidos para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pedidos aprovados": {
+        "main": [
+          [
+            {
+              "node": "Considera múltiplos depósitos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Utiliza valor unitário liquido da tabela": {
+        "main": [
+          [
+            {
+              "node": "Parâmetros das empresas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar quantidade de tentativas": {
+        "main": [
+          [
+            {
+              "node": "Atualiza tentativas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar número de tentativas": {
+        "main": [
+          [
+            {
+              "node": "Validar quantidade de tentativas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zerar número de tentativas": {
+        "main": [
+          [
+            {
+              "node": "Zerar ultimo pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zerar ultimo pedido pendente": {
+        "main": [
+          [
+            {
+              "node": "Zerar correlation token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar quantidade de tentativas": {
+        "main": [
+          [
+            {
+              "node": "Zerar número de tentativas",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Código do último pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zerar correlation token": {
+        "main": [
+          [
+            {
+              "node": "Código do último pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Deposito padrão": {
+        "main": [
+          [
+            {
+              "node": "Utiliza valor unitário liquido da tabela",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Considera múltiplos depósitos": {
+        "main": [
+          [
+            {
+              "node": "Considera múltiplos depósitos?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NoOp": {
+        "main": [
+          [
+            {
+              "node": "Deposito padrão",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Depósitos válidos por filial": {
+        "main": [
+          [
+            {
+              "node": "NoOp",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Inserir Pedido Venda": {
+        "main": [
+          [
+            {
+              "node": "Pegar dados enviados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pegar resultado do envio": {
+        "main": [
+          [
+            {
+              "node": "Somar tentativa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar tentativas": {
+        "main": [
+          [
+            {
+              "node": "Pausar",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Pegar dados enviados1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar pedido pendente": {
+        "main": [
+          [
+            {
+              "node": "Pedidos aprovados",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Buscar correlation token gravado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar correlation token gravado": {
+        "main": [
+          [
+            {
+              "node": "Gerar número de tentativa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pegar dados enviados": {
+        "main": [
+          [
+            {
+              "node": "Validar status pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Considera múltiplos depósitos?": {
+        "main": [
+          [
+            {
+              "node": "Depósitos válidos por filial",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "NoOp",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Remove chavePVTabelaPreco duplicada": {
+        "main": [
+          [
+            {
+              "node": "Buscar tabela de preço",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pega um pedido": {
+        "main": [
+          [
+            {
+              "node": "Inserir Pedido Venda",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ERROS": {
+        "main": [
+          [
+            {
+              "node": "Alerta erro pra inserção no ERP",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Trata msg envio e-mail",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SUCESSO": {
+        "main": [
+          [
+            {
+              "node": "Atualizar status do pedido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Somar tentativa": {
+        "main": [
+          [
+            {
+              "node": "Validar tentativas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gerar número de tentativa": {
+        "main": [
+          [
+            {
+              "node": "Pegar resultado do envio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pegar dados enviados1": {
+        "main": [
+          [
+            {
+              "node": "Verifica status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Alerta erro pra inserção no ERP": {
+        "main": [
+          [
+            {
+              "node": "Validar se há pedidos para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verifica status": {
+        "main": [
+          [
+            {
+              "node": "SUCESSO1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "ERROS1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "PENDENTE",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Atualizar status do pedido1": {
+        "main": [
+          [
+            {
+              "node": "Atualiza chavePVPedido do último pedido pendente",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza correlationToken",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza tentativas",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Inicia ou continua?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza código do último pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ERROS1": {
+        "main": [
+          [
+            {
+              "node": "Pedido de Venda já cadastrado?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SUCESSO1": {
+        "main": [
+          [
+            {
+              "node": "Atualizar status do pedido1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Alerta erro pra inserção no ERP1": {
+        "main": [
+          [
+            {
+              "node": "Atualiza chavePVPedido do último pedido pendente",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza correlationToken",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza tentativas",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Inicia ou continua?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza código do último pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PENDENTE": {
+        "main": [
+          [
+            {
+              "node": "Alerta requisições pendentes na SIAGRI API",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar quantidade de tentativas",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza correlationToken",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza chavePVPedido do último pedido pendente",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Atualiza código do último pedido pendente",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Trata msg envio e-mail1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar status pendente": {
+        "main": [
+          [
+            {
+              "node": "Validar erro",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Gerar número de tentativa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Inicia ou continua?": {
+        "main": [
+          [
+            {
+              "node": "Validar se há pedidos para enviar",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Pedidos aprovados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pedido de Venda já cadastrado?": {
+        "main": [
+          [
+            {
+              "node": "Atualizar status do pedido1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Alerta erro pra inserção no ERP1",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Trata msg envio e-mail",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Código do último pedido pendente": {
+        "main": [
+          [
+            {
+              "node": "ChavePVPedido do último pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ChavePVPedido do último pedido pendente": {
+        "main": [
+          [
+            {
+              "node": "Validar pedido pendente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parâmetros das empresas": {
+        "main": [
+          [
+            {
+              "node": "Filtra pedidos válidos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filtra pedidos válidos": {
+        "main": [
+          [
+            {
+              "node": "Buscar usuarios",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar login do usuário do pedido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Trata msg envio e-mail": {
+        "main": [
+          [
+            {
+              "node": "Envia e-mail de erro de regra de negócio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Trata msg envio e-mail1": {
+        "main": [
+          [
+            {
+              "node": "Envia e-mail de requisições pendentes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pausar": {
+        "main": [
+          [
+            {
+              "node": "Gerar número de tentativa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Agendar Execução1": {
+        "main": [
+          [
+            {
+              "node": "Buscar número de tentativas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    }
+  }
